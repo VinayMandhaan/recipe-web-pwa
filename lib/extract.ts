@@ -84,25 +84,36 @@ async function getTikTok(
 async function getInstagram(
   url: string
 ): Promise<{ ok: boolean; caption: string; reason: string | null }> {
-  const r = await fetch(url, {
-    headers: { "User-Agent": UA },
-    redirect: "follow",
-  });
-  const html = await r.text();
-  const $ = cheerio.load(html);
-  const ogDesc =
-    $('meta[property="og:description"]').attr("content") ||
-    $('meta[name="og:description"]').attr("content");
+  // First try og:description from HTML
+  try {
+    const r = await fetch(url, {
+      headers: { "User-Agent": UA },
+      redirect: "follow",
+    });
+    const html = await r.text();
+    const $ = cheerio.load(html);
+    const ogDesc =
+      $('meta[property="og:description"]').attr("content") ||
+      $('meta[name="og:description"]').attr("content");
 
-  if (ogDesc) return { ok: true, caption: decode(ogDesc), reason: null };
+    if (ogDesc) return { ok: true, caption: decode(ogDesc), reason: null };
+  } catch { /* fall through */ }
 
-  const walled = /loginForm|"login_|please wait|challenge/i.test(html);
+  // Fallback: use yt-dlp metadata to get caption (works from datacenter IPs)
+  try {
+    const cleanUrl = url.split("?")[0];
+    const meta = execSync(`yt-dlp --dump-json "${cleanUrl}" 2>/dev/null`, { timeout: 30000 }).toString();
+    const data = JSON.parse(meta);
+    const desc = data.description || "";
+    if (desc.trim()) {
+      return { ok: true, caption: desc, reason: null };
+    }
+  } catch { /* yt-dlp not available or failed */ }
+
   return {
     ok: false,
     caption: "",
-    reason: walled
-      ? "WALLED (datacenter-IP block) - run on home wifi or use a paid scraper"
-      : `no og:description (HTTP ${r.status})`,
+    reason: "WALLED (datacenter-IP block)",
   };
 }
 
@@ -300,7 +311,7 @@ async function transcribeVideo(
 
   try {
     execSync(
-      `yt-dlp -x --audio-format mp3 -o "/tmp/reel_audio.%(ext)s" "${reelUrl}"`,
+      `yt-dlp -x --audio-format mp3 -o "/tmp/reel_audio.%(ext)s" "${reelUrl.split("?")[0]}"`,
       { timeout: 60000 }
     );
   } catch {
@@ -396,4 +407,13 @@ export async function runCascade(url: string): Promise<CascadeResponse> {
 // direct blog URL extraction (for testing JSON-LD directly)
 export async function extractFromBlog(url: string) {
   return fetchLink(url);
+}
+
+// extract recipe from raw pasted text (caption, transcript, etc.)
+export async function extractFromText(text: string) {
+  const ex = await groqExtract(text);
+  if (isGood(ex)) {
+    return { stage: "caption" as const, result: ex.parsed! };
+  }
+  return { stage: "fallback" as const, result: null };
 }
