@@ -57,20 +57,28 @@ async function resolveRedirect(u: string): Promise<string> {
 async function getTikTok(
   url: string
 ): Promise<{ ok: boolean; caption: string; reason: string | null }> {
-  const canonical = url.includes("/video/")
-    ? url
-    : await resolveRedirect(url);
-  const r = await fetch(
-    `https://www.tiktok.com/oembed?url=${encodeURIComponent(canonical)}`,
-    { headers: { "User-Agent": UA } }
-  );
-  if (!r.ok) return { ok: false, caption: "", reason: `oembed HTTP ${r.status}` };
-  const d = await r.json();
-  return {
-    ok: !!d.title,
-    caption: d.title || "",
-    reason: d.title ? null : "empty caption",
-  };
+  try {
+    const canonical = url.includes("/video/")
+      ? url
+      : await resolveRedirect(url);
+    const r = await fetch(
+      `https://www.tiktok.com/oembed?url=${encodeURIComponent(canonical)}`,
+      { headers: { "User-Agent": UA } }
+    );
+    if (!r.ok) return { ok: false, caption: "", reason: `oembed HTTP ${r.status}` };
+    const text = await r.text();
+    if (text.trimStart().startsWith("<")) {
+      return { ok: false, caption: "", reason: "WALLED (datacenter-IP block)" };
+    }
+    const d = JSON.parse(text);
+    return {
+      ok: !!d.title,
+      caption: d.title || "",
+      reason: d.title ? null : "empty caption",
+    };
+  } catch {
+    return { ok: false, caption: "", reason: "oEmbed request failed" };
+  }
 }
 
 async function getInstagram(
