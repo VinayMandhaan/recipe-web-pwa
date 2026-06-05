@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 
 // Save a recipe
 export async function POST(req: Request) {
@@ -13,7 +13,7 @@ export async function POST(req: Request) {
 
     // Check if already saved (same user + same url)
     if (source_url) {
-      const { data: existing } = await supabase
+      const { data: existing } = await getSupabase()
         .from("saved_recipes")
         .select("id")
         .eq("user_id", user_id)
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from("saved_recipes")
       .insert({
         user_id,
@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "user_id is required" }, { status: 400 });
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from("saved_recipes")
     .select("*")
     .eq("user_id", userId)
@@ -82,7 +82,7 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: "id and user_id are required" }, { status: 400 });
     }
 
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from("saved_recipes")
       .delete()
       .eq("id", id)

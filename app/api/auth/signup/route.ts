@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     }
 
     // Check if email already exists
-    const { data: existing } = await supabase
+    const { data: existing } = await getSupabase()
       .from("users")
       .select("id")
       .eq("email", email.toLowerCase().trim())
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     // Hash password and insert
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const { data: user, error } = await supabase
+    const { data: user, error } = await getSupabase()
       .from("users")
       .insert({
         name: name.trim(),
