@@ -11,8 +11,10 @@ interface RecipeDetailProps {
   platform?: string;
   source_url?: string;
   confidence?: string;
+  tag?: string;
   onClose: () => void;
   onDelete?: () => void;
+  onTagChange?: (tag: string | null) => void;
 }
 
 const STAGE_LABELS: Record<string, { label: string; color: string }> = {
@@ -22,16 +24,54 @@ const STAGE_LABELS: Record<string, { label: string; color: string }> = {
   fallback: { label: "Fallback", color: "bg-white/5 text-[#55556a]" },
 };
 
+const TAGS = [
+  { key: "breakfast", label: "Breakfast", emoji: "🌅" },
+  { key: "lunch", label: "Lunch", emoji: "☀️" },
+  { key: "dinner", label: "Dinner", emoji: "🌙" },
+  { key: "snack", label: "Snack", emoji: "🍿" },
+  { key: "dessert", label: "Dessert", emoji: "🍰" },
+];
+
+const SERVING_OPTIONS = [
+  { label: "0.5x", value: 0.5 },
+  { label: "1x", value: 1 },
+  { label: "2x", value: 2 },
+  { label: "3x", value: 3 },
+];
+
+function scaleIngredient(ing: string, multiplier: number): string {
+  if (multiplier === 1) return ing;
+  // Match numbers (including fractions and decimals) at the start or after spaces
+  return ing.replace(/(\d+\.?\d*\/?\d*)/g, (match) => {
+    if (match.includes("/")) {
+      const [num, den] = match.split("/");
+      const val = (parseFloat(num) / parseFloat(den)) * multiplier;
+      // Keep as fraction if result is clean
+      if (val % 1 === 0) return String(val);
+      if (val % 0.5 === 0) return val < 1 ? `1/${Math.round(1 / val)}` : String(val);
+      return val.toFixed(1).replace(/\.0$/, "");
+    }
+    const val = parseFloat(match) * multiplier;
+    if (val % 1 === 0) return String(val);
+    return val.toFixed(1).replace(/\.0$/, "");
+  });
+}
+
 export default function RecipeDetail({
-  dish, ingredients, steps, stage, platform, source_url, onClose, onDelete,
+  dish, ingredients, steps, stage, platform, source_url, tag, onClose, onDelete, onTagChange,
 }: RecipeDetailProps) {
   const [showShoppingList, setShowShoppingList] = useState(false);
+  const [showTagPicker, setShowTagPicker] = useState(false);
+  const [servingMultiplier, setServingMultiplier] = useState(1);
   const stageInfo = stage ? STAGE_LABELS[stage] : null;
+  const currentTag = TAGS.find((t) => t.key === tag);
+
+  const scaledIngredients = ingredients.map((i) => scaleIngredient(i, servingMultiplier));
 
   function handleShare() {
     let text = `${dish}\n\n`;
     text += `Ingredients:\n`;
-    text += ingredients.map((i) => `- ${i}`).join("\n");
+    text += scaledIngredients.map((i) => `- ${i}`).join("\n");
     if (steps.length > 0) {
       text += `\n\nSteps:\n`;
       text += steps.map((s, i) => `${i + 1}. ${s}`).join("\n");
@@ -68,8 +108,8 @@ export default function RecipeDetail({
         {/* Body */}
         <div className="flex-1 overflow-y-auto no-scrollbar">
           <div className="px-5 py-5 space-y-5">
-            {/* Badges */}
-            <div className="flex items-center gap-2">
+            {/* Badges + Tag */}
+            <div className="flex items-center gap-2 flex-wrap">
               {stageInfo && (
                 <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${stageInfo.color}`}>
                   {stageInfo.label}
@@ -78,15 +118,73 @@ export default function RecipeDetail({
               {platform && (
                 <span className="text-[10px] text-[#55556a] capitalize">{platform}</span>
               )}
+              {onTagChange && (
+                <button
+                  onClick={() => setShowTagPicker(!showTagPicker)}
+                  className={`text-[10px] font-medium px-2 py-0.5 rounded-full border transition-colors ${
+                    currentTag
+                      ? "bg-orange-500/10 text-orange-400 border-orange-500/20"
+                      : "bg-white/5 text-[#55556a] border-[#2a2a3a] active:bg-white/10"
+                  }`}
+                >
+                  {currentTag ? `${currentTag.emoji} ${currentTag.label}` : "+ Tag"}
+                </button>
+              )}
+            </div>
+
+            {/* Tag picker */}
+            {showTagPicker && onTagChange && (
+              <div className="flex gap-2 flex-wrap">
+                {TAGS.map((t) => (
+                  <button
+                    key={t.key}
+                    onClick={() => {
+                      onTagChange(tag === t.key ? null : t.key);
+                      setShowTagPicker(false);
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                      tag === t.key
+                        ? "bg-orange-500/15 text-orange-400 border-orange-500/30"
+                        : "bg-[#16161e] text-[#55556a] border-[#2a2a3a] active:bg-[#1e1e2a]"
+                    }`}
+                  >
+                    {t.emoji} {t.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Serving size adjuster */}
+            <div className="bg-[#16161e] border border-[#2a2a3a] rounded-2xl p-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-[10px] font-semibold uppercase tracking-wider text-[#55556a]">
+                  Serving size
+                </h3>
+                <div className="flex gap-1.5">
+                  {SERVING_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setServingMultiplier(opt.value)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                        servingMultiplier === opt.value
+                          ? "bg-orange-500 text-white"
+                          : "bg-white/5 text-[#55556a] active:bg-white/10"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Ingredients */}
             <div className="bg-[#16161e] border border-[#2a2a3a] rounded-2xl p-5">
               <h3 className="text-[10px] font-semibold uppercase tracking-wider text-[#55556a] mb-3">
-                Ingredients
+                Ingredients {servingMultiplier !== 1 && `(${servingMultiplier}x)`}
               </h3>
               <ul className="space-y-2">
-                {ingredients.map((ing, i) => (
+                {scaledIngredients.map((ing, i) => (
                   <li key={i} className="flex items-start gap-2.5 text-sm text-[#c0c0d0]">
                     <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
                     {ing}
@@ -156,7 +254,7 @@ export default function RecipeDetail({
 
       {showShoppingList && (
         <ShoppingList
-          ingredients={ingredients}
+          ingredients={scaledIngredients}
           dish={dish}
           onClose={() => setShowShoppingList(false)}
         />

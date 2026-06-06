@@ -5,7 +5,7 @@ import { getSupabase } from "@/lib/supabase";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { user_id, source_url, platform, dish, stage, ingredients, steps, confidence, note } = body;
+    const { user_id, source_url, platform, dish, stage, ingredients, steps, confidence, note, tag } = body;
 
     if (!user_id || !dish) {
       return NextResponse.json({ error: "user_id and dish are required" }, { status: 400 });
@@ -37,6 +37,7 @@ export async function POST(req: Request) {
         steps: steps || [],
         confidence: confidence || null,
         note: note || null,
+        tag: tag || null,
       })
       .select()
       .single();
@@ -72,6 +73,34 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json({ recipes: data });
+}
+
+// Update a saved recipe (tag, etc.)
+export async function PATCH(req: Request) {
+  try {
+    const { id, user_id, tag } = await req.json();
+    if (!id || !user_id) {
+      return NextResponse.json({ error: "id and user_id are required" }, { status: 400 });
+    }
+
+    const { data, error } = await getSupabase()
+      .from("saved_recipes")
+      .update({ tag: tag || null })
+      .eq("id", id)
+      .eq("user_id", user_id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Update recipe error:", error);
+      return NextResponse.json({ error: "Could not update recipe" }, { status: 500 });
+    }
+
+    return NextResponse.json({ recipe: data });
+  } catch (err) {
+    console.error("Update recipe error:", err);
+    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+  }
 }
 
 // Delete a saved recipe
