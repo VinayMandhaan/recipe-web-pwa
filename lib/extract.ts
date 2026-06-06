@@ -81,6 +81,61 @@ async function getTikTok(
   }
 }
 
+async function getYouTube(
+  url: string
+): Promise<{ ok: boolean; caption: string; reason: string | null }> {
+  try {
+    const r = await fetch(url, {
+      headers: { "User-Agent": UA },
+      redirect: "follow",
+    });
+    const html = await r.text();
+
+    // Try to extract full description from ytInitialPlayerResponse JSON embedded in page
+    const playerMatch = html.match(
+      /var\s+ytInitialPlayerResponse\s*=\s*(\{[\s\S]+?\});/
+    );
+    if (playerMatch) {
+      try {
+        const player = JSON.parse(playerMatch[1]);
+        const desc =
+          player?.videoDetails?.shortDescription || "";
+        if (desc.trim()) {
+          return { ok: true, caption: desc, reason: null };
+        }
+      } catch { /* JSON parse failed, fall through */ }
+    }
+
+    // Fallback: try og:description from meta tags
+    const $ = cheerio.load(html);
+    const ogDesc =
+      $('meta[property="og:description"]').attr("content") ||
+      $('meta[name="description"]').attr("content");
+    const title =
+      $('meta[property="og:title"]').attr("content") || $("title").text();
+
+    // Combine title + description for better extraction
+    const combined = [title, ogDesc].filter(Boolean).join("\n\n");
+    if (combined.trim()) {
+      return { ok: true, caption: combined, reason: null };
+    }
+  } catch { /* fall through */ }
+
+  // Fallback: use yt-dlp metadata (works great with YouTube)
+  try {
+    const meta = execSync(`yt-dlp --dump-json "${url}" 2>/dev/null`, {
+      timeout: 30000,
+    }).toString();
+    const data = JSON.parse(meta);
+    const desc = data.description || data.title || "";
+    if (desc.trim()) {
+      return { ok: true, caption: desc, reason: null };
+    }
+  } catch { /* yt-dlp not available */ }
+
+  return { ok: false, caption: "", reason: "could not fetch YouTube description" };
+}
+
 async function getInstagram(
   url: string
 ): Promise<{ ok: boolean; caption: string; reason: string | null }> {
@@ -122,11 +177,13 @@ async function getCaption(url: string) {
     return { platform: "tiktok" as const, ...(await getTikTok(url)) };
   if (/instagram\.com/i.test(url))
     return { platform: "instagram" as const, ...(await getInstagram(url)) };
+  if (/youtube\.com|youtu\.be/i.test(url))
+    return { platform: "youtube" as const, ...(await getYouTube(url)) };
   return {
     platform: null,
     ok: false,
     caption: "",
-    reason: "paste a tiktok.com or instagram.com link",
+    reason: "paste a TikTok, Instagram, or YouTube link",
   };
 }
 

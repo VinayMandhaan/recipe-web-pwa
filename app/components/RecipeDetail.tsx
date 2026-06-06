@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import ShoppingList from "./ShoppingList";
 
 interface RecipeDetailProps {
@@ -39,6 +39,24 @@ const SERVING_OPTIONS = [
   { label: "3x", value: 3 },
 ];
 
+interface NutritionData {
+  calories: number;
+  protein_g: number;
+  carbs_g: number;
+  fat_g: number;
+  fiber_g: number;
+  servings: number;
+  serving_size: string;
+  note: string;
+}
+
+const MACRO_COLORS: Record<string, string> = {
+  protein: "bg-blue-500",
+  carbs: "bg-amber-500",
+  fat: "bg-red-400",
+  fiber: "bg-green-500",
+};
+
 function scaleIngredient(ing: string, multiplier: number): string {
   if (multiplier === 1) return ing;
   // Match numbers (including fractions and decimals) at the start or after spaces
@@ -63,10 +81,33 @@ export default function RecipeDetail({
   const [showShoppingList, setShowShoppingList] = useState(false);
   const [showTagPicker, setShowTagPicker] = useState(false);
   const [servingMultiplier, setServingMultiplier] = useState(1);
+  const [nutrition, setNutrition] = useState<NutritionData | null>(null);
+  const [nutritionLoading, setNutritionLoading] = useState(false);
+  const [showNutrition, setShowNutrition] = useState(false);
   const stageInfo = stage ? STAGE_LABELS[stage] : null;
   const currentTag = TAGS.find((t) => t.key === tag);
 
   const scaledIngredients = ingredients.map((i) => scaleIngredient(i, servingMultiplier));
+
+  const fetchNutrition = useCallback(async () => {
+    if (nutrition || nutritionLoading) return;
+    setNutritionLoading(true);
+    try {
+      const res = await fetch("/api/nutrition", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ingredients, dish }),
+      });
+      const d = await res.json();
+      if (d.nutrition) setNutrition(d.nutrition);
+    } catch { /* silent */ }
+    setNutritionLoading(false);
+  }, [ingredients, dish, nutrition, nutritionLoading]);
+
+  function handleNutritionToggle() {
+    setShowNutrition(!showNutrition);
+    if (!nutrition && !nutritionLoading) fetchNutrition();
+  }
 
   function handleShare() {
     let text = `${dish}\n\n`;
@@ -191,6 +232,79 @@ export default function RecipeDetail({
                   </li>
                 ))}
               </ul>
+            </div>
+
+            {/* Nutrition estimate */}
+            <div className="bg-[#16161e] border border-[#2a2a3a] rounded-2xl overflow-hidden">
+              <button
+                onClick={handleNutritionToggle}
+                className="w-full px-5 py-4 flex items-center justify-between active:bg-[#1e1e2a] transition-colors"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="text-base">🔥</span>
+                  <h3 className="text-[10px] font-semibold uppercase tracking-wider text-[#55556a]">
+                    Nutrition estimate
+                  </h3>
+                </div>
+                <svg
+                  className={`w-4 h-4 text-[#55556a] transition-transform ${showNutrition ? "rotate-180" : ""}`}
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {showNutrition && (
+                <div className="px-5 pb-4 space-y-3">
+                  {nutritionLoading ? (
+                    <div className="flex items-center gap-2 py-3">
+                      <span className="w-4 h-4 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+                      <span className="text-xs text-[#55556a]">Estimating nutrition...</span>
+                    </div>
+                  ) : nutrition ? (
+                    <>
+                      {/* Calories header */}
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-2xl font-bold text-[#f0f0f5]">{Math.round(nutrition.calories * servingMultiplier)}</p>
+                          <p className="text-[10px] text-[#55556a]">
+                            calories per {nutrition.serving_size || "serving"}
+                            {servingMultiplier !== 1 ? ` (${servingMultiplier}x)` : ""}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-[#55556a]">Makes ~{nutrition.servings} serving{nutrition.servings !== 1 ? "s" : ""}</p>
+                        </div>
+                      </div>
+
+                      {/* Macro bars */}
+                      <div className="grid grid-cols-4 gap-2">
+                        {[
+                          { key: "protein", label: "Protein", val: nutrition.protein_g, unit: "g" },
+                          { key: "carbs", label: "Carbs", val: nutrition.carbs_g, unit: "g" },
+                          { key: "fat", label: "Fat", val: nutrition.fat_g, unit: "g" },
+                          { key: "fiber", label: "Fiber", val: nutrition.fiber_g, unit: "g" },
+                        ].map((m) => (
+                          <div key={m.key} className="bg-[#0a0a0f] rounded-xl p-2.5 text-center">
+                            <div className={`w-2 h-2 rounded-full ${MACRO_COLORS[m.key]} mx-auto mb-1.5`} />
+                            <p className="text-sm font-semibold text-[#f0f0f5]">
+                              {Math.round(m.val * servingMultiplier * 10) / 10}{m.unit}
+                            </p>
+                            <p className="text-[9px] text-[#55556a] mt-0.5">{m.label}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Disclaimer */}
+                      <p className="text-[9px] text-[#3a3a4a] leading-relaxed">
+                        {nutrition.note || "Estimates only. Actual values depend on exact brands, quantities, and preparation."}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-xs text-[#55556a] py-2">Could not estimate nutrition.</p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Steps */}

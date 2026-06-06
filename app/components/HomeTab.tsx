@@ -193,7 +193,7 @@ export default function HomeTab() {
           What are we cooking<br />today?
         </h1>
         <p className="text-sm text-[#55556a] mt-1">
-          Paste a reel link to extract the recipe
+          Paste a reel or video link to extract the recipe
         </p>
       </div>
 
@@ -209,7 +209,7 @@ export default function HomeTab() {
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !loading && handleExtract()}
-              placeholder="Paste TikTok or Instagram link..."
+              placeholder="Paste TikTok, Instagram, or YouTube link..."
               className="w-full pl-10 pr-4 py-3 bg-[#16161e] border border-[#2a2a3a] rounded-xl text-sm text-[#f0f0f5]
                          focus:outline-none focus:ring-1 focus:ring-orange-500/50 focus:border-orange-500/50
                          placeholder:text-[#3a3a4a]"
@@ -304,8 +304,8 @@ export default function HomeTab() {
               </h3>
               <div className="space-y-2.5">
                 {[
-                  { n: "1", t: "Paste a TikTok or Instagram reel link" },
-                  { n: "2", t: "We extract the recipe from caption, blog, or audio" },
+                  { n: "1", t: "Paste a TikTok, Instagram, or YouTube link" },
+                  { n: "2", t: "We extract the recipe from description, blog, or audio" },
                   { n: "3", t: "Get ingredients, steps, and a shopping list" },
                 ].map((s) => (
                   <div key={s.n} className="flex items-center gap-3">
