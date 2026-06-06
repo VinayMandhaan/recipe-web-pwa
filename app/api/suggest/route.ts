@@ -44,14 +44,22 @@ export async function POST(req: NextRequest) {
       `RULES:\n` +
       `- Return ONLY valid JSON, no markdown, no backticks\n` +
       `- Always respond in English\n` +
-      `- Format: {"suggestions":[{"dish":string,"why":string,"ingredients":[string],"steps":[string],"is_from_saved":boolean}]}\n` +
-      `- Return 1-3 suggestions\n` +
+      `- Format: {"suggestions":[{"dish":string,"type":"saved_match"|"adapted"|"new","why":string,"ingredients":[string],"steps":[string],"missing_ingredients":[string]}]}\n` +
+      `- Return 2-4 suggestions, mix of types when possible\n` +
+      `- "type" meanings:\n` +
+      `  - "saved_match": a recipe from their saved list that fits the query as-is\n` +
+      `  - "adapted": a saved recipe modified to work with what they have (simplified, swapped ingredients, etc.)\n` +
+      `  - "new": a completely new recipe not in their saved list\n` +
       `- "why" should be a short 1-line reason why you suggest this\n` +
-      `- "is_from_saved" is true only if the dish exactly matches one of their saved recipes\n` +
-      `- If suggesting a new recipe, include full ingredients and steps\n` +
-      `- If suggesting from saved, still include ingredients and steps\n` +
+      `- "missing_ingredients" lists items the user would need to buy or might not have. Empty array if they likely have everything.\n` +
+      `- Always include full ingredients list and complete steps for every suggestion\n` +
+      `- When the user mentions specific ingredients they have (e.g. "I have chicken and rice"):\n` +
+      `  1. First check their saved recipes for any that use those ingredients and include them as "saved_match"\n` +
+      `  2. Then adapt a saved recipe if it can be simplified to work with those ingredients ("adapted")\n` +
+      `  3. Then suggest brand new recipes they can make with those ingredients ("new")\n` +
+      `- For adapted recipes, clearly note what was changed in the "why" field\n` +
       `- Keep steps concise but complete\n` +
-      `- Be creative and helpful`;
+      `- Be creative and practical`;
 
     const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",

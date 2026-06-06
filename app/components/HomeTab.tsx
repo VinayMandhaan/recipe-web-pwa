@@ -25,10 +25,11 @@ interface ExtractResponse {
 
 interface Suggestion {
   dish: string;
+  type: "saved_match" | "adapted" | "new";
   why: string;
   ingredients: string[];
   steps: string[];
-  is_from_saved: boolean;
+  missing_ingredients: string[];
 }
 
 interface DummyRecipe {
@@ -47,6 +48,12 @@ const SUGGESTION_CHIPS = [
   { emoji: "🎉", label: "Impress guests", query: "Suggest something impressive I can cook for guests this weekend." },
   { emoji: "🆕", label: "Try something new", query: "Suggest a recipe I haven't saved yet. Something different from my usual cooking style." },
 ];
+
+const TYPE_BADGES: Record<string, { label: string; color: string; emoji: string }> = {
+  saved_match: { label: "From saved", emoji: "📌", color: "bg-green-500/15 text-green-400 border-green-500/20" },
+  adapted: { label: "Adapted", emoji: "🔄", color: "bg-purple-500/15 text-purple-400 border-purple-500/20" },
+  new: { label: "New recipe", emoji: "✨", color: "bg-orange-500/15 text-orange-400 border-orange-500/20" },
+};
 
 const TRENDING: DummyRecipe[] = [
   {
@@ -406,42 +413,55 @@ export default function HomeTab() {
                     Clear
                   </button>
                 </div>
-                {suggestions.map((s, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setSelectedSuggestion(s)}
-                    className="w-full bg-[#16161e] border border-[#2a2a3a] rounded-xl p-4
-                               active:bg-[#1e1e2a] transition-colors text-left"
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="text-2xl mt-0.5">
-                        {s.is_from_saved ? "📌" : "✨"}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-[#f0f0f5]">{s.dish}</p>
-                        <p className="text-xs text-[#55556a] mt-1">{s.why}</p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className="text-[10px] text-[#3a3a4a]">
-                            {s.ingredients.length} ingredients
-                          </span>
-                          <span className="text-[10px] text-[#2a2a3a]">|</span>
-                          <span className="text-[10px] text-[#3a3a4a]">
-                            {s.steps.length} steps
-                          </span>
-                          {s.is_from_saved && (
-                            <>
-                              <span className="text-[10px] text-[#2a2a3a]">|</span>
-                              <span className="text-[10px] text-orange-500/70">From saved</span>
-                            </>
+                {suggestions.map((s, i) => {
+                  const badge = TYPE_BADGES[s.type] || TYPE_BADGES.new;
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedSuggestion(s)}
+                      className="w-full bg-[#16161e] border border-[#2a2a3a] rounded-xl p-4
+                                 active:bg-[#1e1e2a] transition-colors text-left"
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl mt-0.5">{badge.emoji}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-sm font-medium text-[#f0f0f5]">{s.dish}</p>
+                            <span className={`text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded-full border ${badge.color}`}>
+                              {badge.label}
+                            </span>
+                          </div>
+                          <p className="text-xs text-[#55556a] mt-1">{s.why}</p>
+                          <div className="flex items-center gap-2 mt-2 flex-wrap">
+                            <span className="text-[10px] text-[#3a3a4a]">
+                              {s.ingredients.length} ingredients
+                            </span>
+                            <span className="text-[10px] text-[#2a2a3a]">|</span>
+                            <span className="text-[10px] text-[#3a3a4a]">
+                              {s.steps.length} steps
+                            </span>
+                            {s.missing_ingredients && s.missing_ingredients.length > 0 && (
+                              <>
+                                <span className="text-[10px] text-[#2a2a3a]">|</span>
+                                <span className="text-[10px] text-amber-500/70">
+                                  Need {s.missing_ingredients.length} more
+                                </span>
+                              </>
+                            )}
+                          </div>
+                          {s.missing_ingredients && s.missing_ingredients.length > 0 && (
+                            <p className="text-[10px] text-[#3a3a4a] mt-1.5 truncate">
+                              Buy: {s.missing_ingredients.join(", ")}
+                            </p>
                           )}
                         </div>
+                        <svg className="w-4 h-4 text-[#3a3a4a] shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
                       </div>
-                      <svg className="w-4 h-4 text-[#3a3a4a] shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                  </button>
-                ))}
+                    </button>
+                  );
+                })}
               </div>
             )}
 
