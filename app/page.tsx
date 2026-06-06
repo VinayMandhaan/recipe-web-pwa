@@ -6,10 +6,11 @@ import AuthScreen from "./components/AuthScreen";
 import BottomTabs from "./components/BottomTabs";
 import HomeTab from "./components/HomeTab";
 import RecipesTab from "./components/RecipesTab";
+import PlanTab from "./components/PlanTab";
 import HistoryTab from "./components/HistoryTab";
 import AccountTab from "./components/AccountTab";
 
-type Tab = "home" | "recipes" | "history" | "account";
+type Tab = "home" | "recipes" | "plan" | "history" | "account";
 
 function AppShell() {
   const { user, loading } = useAuth();
@@ -34,6 +35,7 @@ function AppShell() {
     <div className="flex flex-col h-dvh bg-[#0a0a0f] safe-top">
       {activeTab === "home" && <HomeTab />}
       {activeTab === "recipes" && <RecipesTab />}
+      {activeTab === "plan" && <PlanTab />}
       {activeTab === "history" && <HistoryTab />}
       {activeTab === "account" && <AccountTab />}
       <BottomTabs active={activeTab} onChange={setActiveTab} />
