@@ -84,26 +84,30 @@ async function getTikTok(
 async function getYouTube(
   url: string
 ): Promise<{ ok: boolean; caption: string; reason: string | null }> {
+  // Fetch the page with consent-bypass headers
   try {
     const r = await fetch(url, {
-      headers: { "User-Agent": UA },
+      headers: {
+        "User-Agent": UA,
+        "Accept-Language": "en-US,en;q=0.9",
+        "Cookie": "SOCS=CAISNQgDEitib3FfaWRlbnRpdHlmcm9udGVuZHVpc2VydmVyXzIwMjMwODI5LjA3X3AxGgJlbiACGgYIgJnSmgY; CONSENT=YES+1",
+      },
       redirect: "follow",
     });
     const html = await r.text();
 
-    // Try to extract full description from ytInitialPlayerResponse JSON embedded in page
-    const playerMatch = html.match(
-      /var\s+ytInitialPlayerResponse\s*=\s*(\{[\s\S]+?\});/
+    // Direct regex for shortDescription (faster and more reliable than parsing full JSON)
+    const descMatch = html.match(
+      /"shortDescription":"((?:[^"\\]|\\.)*)"/
     );
-    if (playerMatch) {
-      try {
-        const player = JSON.parse(playerMatch[1]);
-        const desc =
-          player?.videoDetails?.shortDescription || "";
-        if (desc.trim()) {
-          return { ok: true, caption: desc, reason: null };
-        }
-      } catch { /* JSON parse failed, fall through */ }
+    if (descMatch) {
+      const desc = descMatch[1]
+        .replace(/\\n/g, "\n")
+        .replace(/\\"/g, '"')
+        .replace(/\\\\/g, "\\");
+      if (desc.trim()) {
+        return { ok: true, caption: desc, reason: null };
+      }
     }
 
     // Fallback: try og:description from meta tags
@@ -114,14 +118,25 @@ async function getYouTube(
     const title =
       $('meta[property="og:title"]').attr("content") || $("title").text();
 
-    // Combine title + description for better extraction
     const combined = [title, ogDesc].filter(Boolean).join("\n\n");
     if (combined.trim()) {
       return { ok: true, caption: combined, reason: null };
     }
   } catch { /* fall through */ }
 
-  // Fallback: use yt-dlp metadata (works great with YouTube)
+  // Fallback: YouTube oEmbed for at least the title
+  try {
+    const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+    const r = await fetch(oembedUrl, { headers: { "User-Agent": UA } });
+    if (r.ok) {
+      const d = await r.json();
+      if (d.title) {
+        return { ok: true, caption: d.title, reason: null };
+      }
+    }
+  } catch { /* fall through */ }
+
+  // Fallback: use yt-dlp metadata (works great with YouTube, EC2 only)
   try {
     const meta = execSync(`yt-dlp --dump-json "${url}" 2>/dev/null`, {
       timeout: 30000,
