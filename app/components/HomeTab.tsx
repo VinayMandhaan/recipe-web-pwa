@@ -23,6 +23,14 @@ interface ExtractResponse {
   message?: string;
 }
 
+interface Suggestion {
+  dish: string;
+  why: string;
+  ingredients: string[];
+  steps: string[];
+  is_from_saved: boolean;
+}
+
 interface DummyRecipe {
   emoji: string;
   title: string;
@@ -30,6 +38,15 @@ interface DummyRecipe {
   ingredients: string[];
   steps: string[];
 }
+
+const SUGGESTION_CHIPS = [
+  { emoji: "🌙", label: "What's for dinner?", query: "Suggest something for dinner tonight. Something satisfying and not too complicated." },
+  { emoji: "⚡", label: "Quick 30-min meal", query: "Suggest a quick meal I can make in under 30 minutes." },
+  { emoji: "🥗", label: "Something healthy", query: "Suggest a healthy, nutritious meal. Low calorie, high protein if possible." },
+  { emoji: "🍳", label: "Use my pantry", query: "Based on the ingredients I already have from my saved recipes, suggest something I can make without buying much more." },
+  { emoji: "🎉", label: "Impress guests", query: "Suggest something impressive I can cook for guests this weekend." },
+  { emoji: "🆕", label: "Try something new", query: "Suggest a recipe I haven't saved yet. Something different from my usual cooking style." },
+];
 
 const TRENDING: DummyRecipe[] = [
   {
@@ -143,6 +160,36 @@ export default function HomeTab() {
   const [data, setData] = useState<ExtractResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedDummy, setSelectedDummy] = useState<DummyRecipe | null>(null);
+  const [aiQuery, setAiQuery] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  async function handleAiSuggest(query: string) {
+    if (!user || aiLoading) return;
+    setAiLoading(true);
+    setSuggestions([]);
+    setAiError(null);
+    try {
+      const res = await fetch("/api/suggest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: user.id, query }),
+      });
+      const json = await res.json();
+      if (json.error) {
+        setAiError(json.error);
+      } else {
+        setSuggestions(json.suggestions || []);
+      }
+    } catch {
+      setAiError("Could not get suggestions. Try again.");
+    } finally {
+      setAiLoading(false);
+      setAiQuery("");
+    }
+  }
 
   async function handleExtract() {
     const trimmed = url.trim();
@@ -263,6 +310,141 @@ export default function HomeTab() {
         {/* Trending section (show when no result) */}
         {!data && !loading && !error && (
           <>
+            {/* AI Chef */}
+            <div className="bg-[#16161e] border border-[#2a2a3a] rounded-2xl overflow-hidden">
+              <div className="px-5 pt-4 pb-3 flex items-center gap-2.5">
+                <span className="text-xl">🤖</span>
+                <div>
+                  <h3 className="text-sm font-semibold text-[#f0f0f5]">AI Chef</h3>
+                  <p className="text-[10px] text-[#55556a]">Get personalized recipe suggestions</p>
+                </div>
+              </div>
+
+              {/* Suggestion chips */}
+              <div className="px-5 pb-3 flex gap-2 overflow-x-auto no-scrollbar">
+                {SUGGESTION_CHIPS.map((chip) => (
+                  <button
+                    key={chip.label}
+                    onClick={() => handleAiSuggest(chip.query)}
+                    disabled={aiLoading}
+                    className="shrink-0 px-3 py-2 bg-[#0a0a0f] border border-[#2a2a3a] rounded-xl
+                               active:bg-orange-500/10 active:border-orange-500/20 transition-colors
+                               disabled:opacity-40 flex items-center gap-1.5"
+                  >
+                    <span className="text-sm">{chip.emoji}</span>
+                    <span className="text-xs text-[#8888a0] whitespace-nowrap">{chip.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Custom query input */}
+              <div className="px-5 pb-4">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={aiQuery}
+                    onChange={(e) => setAiQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && aiQuery.trim() && handleAiSuggest(aiQuery.trim())}
+                    placeholder="Ask anything... e.g. 'something spicy with chicken'"
+                    className="flex-1 px-3.5 py-2.5 bg-[#0a0a0f] border border-[#2a2a3a] rounded-xl text-sm text-[#f0f0f5]
+                               focus:outline-none focus:ring-1 focus:ring-orange-500/50 focus:border-orange-500/50
+                               placeholder:text-[#3a3a4a]"
+                    disabled={aiLoading}
+                  />
+                  <button
+                    onClick={() => aiQuery.trim() && handleAiSuggest(aiQuery.trim())}
+                    disabled={aiLoading || !aiQuery.trim()}
+                    className="px-4 py-2.5 gradient-accent text-white font-medium rounded-xl text-sm
+                               active:opacity-80 transition-opacity disabled:opacity-30 shrink-0"
+                  >
+                    {aiLoading ? (
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* AI Loading */}
+            {aiLoading && (
+              <div className="bg-[#16161e] border border-[#2a2a3a] rounded-2xl p-5 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+                  <span className="text-sm text-[#55556a]">Thinking of something tasty...</span>
+                </div>
+                <div className="space-y-2">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="h-3.5 shimmer rounded w-full" />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* AI Error */}
+            {aiError && (
+              <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400 text-sm">
+                {aiError}
+              </div>
+            )}
+
+            {/* AI Suggestions */}
+            {suggestions.length > 0 && !aiLoading && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-[10px] font-semibold uppercase tracking-wider text-[#55556a]">
+                    AI Suggestions
+                  </h3>
+                  <button
+                    onClick={() => setSuggestions([])}
+                    className="text-[10px] text-[#3a3a4a] active:text-[#55556a]"
+                  >
+                    Clear
+                  </button>
+                </div>
+                {suggestions.map((s, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedSuggestion(s)}
+                    className="w-full bg-[#16161e] border border-[#2a2a3a] rounded-xl p-4
+                               active:bg-[#1e1e2a] transition-colors text-left"
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl mt-0.5">
+                        {s.is_from_saved ? "📌" : "✨"}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-[#f0f0f5]">{s.dish}</p>
+                        <p className="text-xs text-[#55556a] mt-1">{s.why}</p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="text-[10px] text-[#3a3a4a]">
+                            {s.ingredients.length} ingredients
+                          </span>
+                          <span className="text-[10px] text-[#2a2a3a]">|</span>
+                          <span className="text-[10px] text-[#3a3a4a]">
+                            {s.steps.length} steps
+                          </span>
+                          {s.is_from_saved && (
+                            <>
+                              <span className="text-[10px] text-[#2a2a3a]">|</span>
+                              <span className="text-[10px] text-orange-500/70">From saved</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <svg className="w-4 h-4 text-[#3a3a4a] shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+
             {/* Banner */}
             <div className="relative overflow-hidden rounded-2xl h-40 gradient-accent">
               <div className="absolute inset-0 flex items-center px-6">
@@ -328,6 +510,16 @@ export default function HomeTab() {
           ingredients={selectedDummy.ingredients}
           steps={selectedDummy.steps}
           onClose={() => setSelectedDummy(null)}
+        />
+      )}
+
+      {/* AI suggestion detail overlay */}
+      {selectedSuggestion && (
+        <RecipeDetail
+          dish={selectedSuggestion.dish}
+          ingredients={selectedSuggestion.ingredients}
+          steps={selectedSuggestion.steps}
+          onClose={() => setSelectedSuggestion(null)}
         />
       )}
     </div>
