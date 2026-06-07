@@ -109,8 +109,14 @@ export async function POST(req: Request) {
         `- Do NOT inflate protein for vegetable-only dishes. Vegetables have very little protein.\n` +
         `- A pure veggie dish (no meat/dal/paneer/eggs) with 200g vegetables typically has 3-6g protein total, not 10+\n` +
         `- Estimate for a single serving\n` +
-        `- "rating" is an overall healthiness rating\n` +
-        `- "rating_reason" is a 1-line explanation\n` +
+        `- "rating" MUST follow these strict rules (do NOT default to "good"):\n` +
+        `  "excellent": protein > 25g AND calories < 500 AND fat < 15g (e.g. grilled chicken salad, dal with veggies)\n` +
+        `  "good": protein > 15g AND calories < 600 AND balanced macros (e.g. chicken rice bowl, fish curry)\n` +
+        `  "fair": protein < 15g OR calories > 600 OR carbs > 60g OR fat > 25g (e.g. energy balls, fried snacks, heavy pasta)\n` +
+        `  "poor": protein < 8g AND (calories > 500 OR fat > 30g OR sugar-heavy) (e.g. fries, candy, sugary desserts)\n` +
+        `- A meal with <10g protein is NEVER "good" or "excellent", even if it has fiber\n` +
+        `- A meal with >500 calories and <15g protein is "fair" at best\n` +
+        `- "rating_reason" is a 1-line explanation referencing the specific numbers\n` +
         `- "improvements" is 2-4 practical tips to make this meal healthier\n` +
         `- Each tip should have a short "tip" and a brief "impact" (e.g. "Add 100g paneer for +18g protein")\n` +
         `- If protein is below 15g, the first improvement MUST suggest a specific protein source with exact grams\n` +
