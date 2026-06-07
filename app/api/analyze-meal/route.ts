@@ -108,7 +108,13 @@ export async function POST(req: Request) {
         `  Lentils/dal (cooked 100g): 116cal, 9g protein, 20g carbs, 0.4g fat\n` +
         `- Do NOT inflate protein for vegetable-only dishes. Vegetables have very little protein.\n` +
         `- A pure veggie dish (no meat/dal/paneer/eggs) with 200g vegetables typically has 3-6g protein total, not 10+\n` +
-        `- Estimate for a single serving\n` +
+        `- CRITICAL: The ingredients listed may be for a FULL BATCH, not one serving. You MUST:\n` +
+        `  1. First calculate total nutrition for ALL ingredients combined\n` +
+        `  2. Then estimate how many servings the batch makes (e.g. energy balls = 15-20 pieces, a curry = 3-4 plates)\n` +
+        `  3. DIVIDE the totals by the number of servings\n` +
+        `  4. Report the PER-SERVING numbers only\n` +
+        `- Sanity check: a single serving should almost never exceed 800 calories. If your per-serving number is over 800, you probably forgot to divide by servings.\n` +
+        `- "serving_size" should describe one portion (e.g. "1 energy ball", "1 bowl", "1 plate")\n` +
         `- "rating" MUST follow these strict rules (do NOT default to "good"):\n` +
         `  "excellent": protein > 25g AND calories < 500 AND fat < 15g (e.g. grilled chicken salad, dal with veggies)\n` +
         `  "good": protein > 15g AND calories < 600 AND balanced macros (e.g. chicken rice bowl, fish curry)\n` +
