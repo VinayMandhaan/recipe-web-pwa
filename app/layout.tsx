@@ -42,12 +42,8 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {
-                if (location.protocol === 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                if (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
                   navigator.serviceWorker.register('/sw.js').catch(function() {});
-                } else {
-                  navigator.serviceWorker.getRegistrations().then(function(regs) {
-                    regs.forEach(function(r) { r.unregister(); });
-                  });
                 }
               }
             `,

@@ -21,6 +21,7 @@ export default function AccountTab() {
   const [notifEnabled, setNotifEnabled] = useState(false);
   const [notifLoading, setNotifLoading] = useState(false);
   const [notifSupported, setNotifSupported] = useState(false);
+  const [notifError, setNotifError] = useState<string | null>(null);
 
   const name = user?.name || "User";
   const email = user?.email || "";
@@ -51,6 +52,7 @@ export default function AccountTab() {
   async function toggleNotifications() {
     if (!user || notifLoading) return;
     setNotifLoading(true);
+    setNotifError(null);
 
     try {
       if (notifEnabled) {
@@ -66,21 +68,35 @@ export default function AccountTab() {
         });
         setNotifEnabled(false);
       } else {
+        // Check VAPID key
+        if (!VAPID_PUBLIC_KEY) {
+          setNotifError("Push not configured. VAPID key missing.");
+          setNotifLoading(false);
+          return;
+        }
+
         // Request permission
         const permission = await Notification.requestPermission();
+        if (permission === "denied") {
+          setNotifError("Notifications blocked. Enable them in browser settings.");
+          setNotifLoading(false);
+          return;
+        }
         if (permission !== "granted") {
           setNotifLoading(false);
           return;
         }
 
-        // Subscribe
+        // Wait for service worker
         const reg = await navigator.serviceWorker.ready;
+
+        // Subscribe
         const sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
         });
 
-        await fetch("/api/push", {
+        const res = await fetch("/api/push", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -88,10 +104,19 @@ export default function AccountTab() {
             subscription: sub.toJSON(),
           }),
         });
+
+        if (!res.ok) {
+          const d = await res.json().catch(() => ({}));
+          setNotifError(d.error || "Could not save subscription");
+          setNotifLoading(false);
+          return;
+        }
+
         setNotifEnabled(true);
       }
     } catch (err) {
       console.error("Notification toggle error:", err);
+      setNotifError(String(err instanceof Error ? err.message : err));
     } finally {
       setNotifLoading(false);
     }
@@ -118,20 +143,22 @@ export default function AccountTab() {
         {/* Settings */}
         <div className="bg-[#16161e] border border-[#2a2a3a] rounded-xl overflow-hidden">
           {/* Notifications toggle */}
-          {notifSupported && (
-            <div className="px-4 py-3.5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <svg className="w-5 h-5 text-[#55556a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
-                <div>
-                  <span className="text-sm text-[#c0c0d0]">Meal reminders</span>
-                  <p className="text-[10px] text-[#3a3a4a] mt-0.5">
-                    Get notified when it's time to cook
-                  </p>
-                </div>
+          <div className="px-4 py-3.5 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <svg className="w-5 h-5 text-[#55556a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <div>
+                <span className="text-sm text-[#c0c0d0]">Meal reminders</span>
+                <p className="text-[10px] text-[#3a3a4a] mt-0.5">
+                  {notifSupported
+                    ? "Get notified when it's time to cook"
+                    : "Not supported on this browser"}
+                </p>
               </div>
+            </div>
+            {notifSupported ? (
               <button
                 onClick={toggleNotifications}
                 disabled={notifLoading}
@@ -145,6 +172,13 @@ export default function AccountTab() {
                   }`}
                 />
               </button>
+            ) : (
+              <span className="text-[10px] text-[#3a3a4a]">Unavailable</span>
+            )}
+          </div>
+          {notifError && (
+            <div className="px-4 pb-3">
+              <p className="text-[11px] text-red-400 bg-red-500/10 rounded-lg px-3 py-2">{notifError}</p>
             </div>
           )}
 
