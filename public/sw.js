@@ -24,3 +24,37 @@ self.addEventListener("fetch", (e) => {
     caches.match(e.request).then((cached) => cached || fetch(e.request))
   );
 });
+
+// Push notification handler
+self.addEventListener("push", (e) => {
+  let data = { title: "ReelRecipe", body: "Time to cook!", icon: "/icon-192.png" };
+  try {
+    if (e.data) data = { ...data, ...e.data.json() };
+  } catch { /* use defaults */ }
+
+  e.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: data.icon || "/icon-192.png",
+      badge: "/icon-192.png",
+      data: data.url || "/",
+      vibrate: [200, 100, 200],
+    })
+  );
+});
+
+// Open app when notification is tapped
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const url = e.notification.data || "/";
+  e.waitUntil(
+    self.clients.matchAll({ type: "window" }).then((clients) => {
+      for (const client of clients) {
+        if (client.url.includes(self.location.origin) && "focus" in client) {
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    })
+  );
+});
