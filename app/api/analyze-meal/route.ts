@@ -87,7 +87,7 @@ export async function POST(req: Request) {
       }
 
       const prompt =
-        `Analyze the nutrition and suggest improvements for "${dish || "this dish"}" ` +
+        `You are a precise nutrition calculator. Analyze "${dish || "this dish"}" ` +
         `with these ingredients:\n${ingredients.join("\n")}\n\n` +
         `Return ONLY valid JSON:\n` +
         `{"calories":number,"protein_g":number,"carbs_g":number,"fat_g":number,"fiber_g":number,` +
@@ -95,13 +95,25 @@ export async function POST(req: Request) {
         `"rating":"excellent"|"good"|"fair"|"poor",` +
         `"rating_reason":string,` +
         `"improvements":[{"tip":string,"impact":string}]}\n\n` +
-        `Rules:\n` +
-        `- Estimate for the single serving shown\n` +
+        `CRITICAL RULES for accuracy:\n` +
+        `- Use USDA nutritional data as your reference\n` +
+        `- Calculate each ingredient individually then sum up. Show your work mentally.\n` +
+        `- Common reference points per 100g raw:\n` +
+        `  Potato: 77cal, 2g protein, 17g carbs, 0.1g fat\n` +
+        `  Okra: 33cal, 1.9g protein, 7g carbs, 0.2g fat\n` +
+        `  Rice (cooked): 130cal, 2.7g protein, 28g carbs, 0.3g fat\n` +
+        `  Chicken breast: 165cal, 31g protein, 0g carbs, 3.6g fat\n` +
+        `  Cooking oil (1 tbsp/15ml): 120cal, 0g protein, 0g carbs, 14g fat\n` +
+        `  Lentils/dal (cooked 100g): 116cal, 9g protein, 20g carbs, 0.4g fat\n` +
+        `- Do NOT inflate protein for vegetable-only dishes. Vegetables have very little protein.\n` +
+        `- A pure veggie dish (no meat/dal/paneer/eggs) with 200g vegetables typically has 3-6g protein total, not 10+\n` +
+        `- Estimate for a single serving\n` +
         `- "rating" is an overall healthiness rating\n` +
-        `- "rating_reason" is a 1-line explanation of the rating\n` +
-        `- "improvements" is a list of 2-4 practical tips to make this meal healthier\n` +
-        `- Each tip should have a short "tip" and a brief "impact" (e.g. "Saves ~100 calories")\n` +
-        `- Be practical, not preachy`;
+        `- "rating_reason" is a 1-line explanation\n` +
+        `- "improvements" is 2-4 practical tips to make this meal healthier\n` +
+        `- Each tip should have a short "tip" and a brief "impact" (e.g. "Add 100g paneer for +18g protein")\n` +
+        `- If protein is below 15g, the first improvement MUST suggest a specific protein source with exact grams\n` +
+        `- Be accurate above all else`;
 
       const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
