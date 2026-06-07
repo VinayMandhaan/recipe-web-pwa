@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getSupabase } from "@/lib/supabase";
 
 const GROQ_KEY = () => process.env.GROQ_API_KEY || "";
 
@@ -7,7 +8,7 @@ const VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct";
 
 export async function POST(req: Request) {
   try {
-    const { image, step, ingredients, dish } = await req.json();
+    const { image, step, ingredients, dish, user_id } = await req.json();
 
     const key = GROQ_KEY();
     if (!key) {
@@ -139,6 +140,24 @@ export async function POST(req: Request) {
       }
 
       const result = JSON.parse(d.choices[0].message.content);
+
+      // Log the scan to Supabase (fire and forget)
+      try {
+        await getSupabase()
+          .from("meal_scans")
+          .insert({
+            user_id: user_id || null,
+            dish: dish || "Unknown",
+            ingredients,
+            calories: result.calories || 0,
+            protein_g: result.protein_g || 0,
+            carbs_g: result.carbs_g || 0,
+            fat_g: result.fat_g || 0,
+            fiber_g: result.fiber_g || 0,
+            rating: result.rating || null,
+          });
+      } catch { /* silent - don't break the response if logging fails */ }
+
       return NextResponse.json(result);
     }
 

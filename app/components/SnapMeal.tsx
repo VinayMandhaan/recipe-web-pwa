@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useAuth } from "./AuthProvider";
 
 interface IdentifyResult {
   dish: string;
@@ -35,6 +36,7 @@ const MACRO_COLORS: Record<string, string> = {
 };
 
 export default function SnapMeal({ onClose }: { onClose: () => void }) {
+  const { user } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<"capture" | "review" | "results">("capture");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -130,6 +132,7 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
           step: "nutrition",
           ingredients: editIngredients,
           dish: identified?.dish || "Unknown dish",
+          user_id: user?.id || null,
         }),
       });
       const d = await res.json();
