@@ -47,6 +47,8 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
   const [analyzingNutrition, setAnalyzingNutrition] = useState(false);
   const [nutrition, setNutrition] = useState<NutritionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -149,6 +151,32 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
     }
   }
 
+  async function handleSave() {
+    if (!user || !identified || saved || saving) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/recipes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user.id,
+          source_url: null,
+          platform: "snap",
+          dish: identified.dish,
+          stage: "snap",
+          ingredients: editIngredients,
+          steps: [],
+          confidence: identified.confidence || "medium",
+          note: nutrition
+            ? `${Math.round(nutrition.calories)} cal | ${nutrition.protein_g}g protein | ${nutrition.carbs_g}g carbs | ${nutrition.fat_g}g fat`
+            : "Scanned via Snap Meal",
+        }),
+      });
+      if (res.ok || res.status === 409) setSaved(true);
+    } catch { /* silent */ }
+    setSaving(false);
+  }
+
   function resetAll() {
     setStep("capture");
     setImagePreview(null);
@@ -156,6 +184,7 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
     setEditIngredients([]);
     setNutrition(null);
     setError(null);
+    setSaved(false);
     if (fileRef.current) fileRef.current.value = "";
   }
 
@@ -485,21 +514,52 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
       )}
 
       {step === "results" && (
-        <div className="px-5 py-4 border-t border-[#2a2a3a] flex gap-3">
+        <div className="px-5 py-4 border-t border-[#2a2a3a] space-y-2">
+          {/* Save button */}
           <button
-            onClick={() => setStep("review")}
-            className="flex-1 py-3 bg-white/5 text-[#8888a0] font-medium rounded-xl text-sm
-                       active:bg-white/10 transition-colors"
+            onClick={handleSave}
+            disabled={saved || saving}
+            className={`w-full py-3 font-medium rounded-xl text-sm flex items-center justify-center gap-2 transition-colors ${
+              saved
+                ? "bg-green-500/15 text-green-400"
+                : "gradient-accent text-white active:opacity-80"
+            } ${saving ? "opacity-50" : ""}`}
           >
-            Edit ingredients
+            {saving ? (
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : saved ? (
+              <>
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                </svg>
+                Saved to Recipes
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                </svg>
+                Save to My Recipes
+              </>
+            )}
           </button>
-          <button
-            onClick={resetAll}
-            className="flex-1 py-3 gradient-accent text-white font-medium rounded-xl text-sm
-                       active:opacity-80 transition-opacity"
-          >
-            Snap another
-          </button>
+          {/* Secondary actions */}
+          <div className="flex gap-3">
+            <button
+              onClick={() => setStep("review")}
+              className="flex-1 py-3 bg-white/5 text-[#8888a0] font-medium rounded-xl text-sm
+                         active:bg-white/10 transition-colors"
+            >
+              Edit ingredients
+            </button>
+            <button
+              onClick={resetAll}
+              className="flex-1 py-3 bg-white/5 text-[#8888a0] font-medium rounded-xl text-sm
+                         active:bg-white/10 transition-colors"
+            >
+              Snap another
+            </button>
+          </div>
         </div>
       )}
     </div>
