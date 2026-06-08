@@ -56,6 +56,8 @@ export async function POST(req: Request) {
                     "Rules for meals without labels:\n" +
                     "- Name the dish in English\n" +
                     "- List all visible and likely ingredients with approximate quantities (e.g. '2 cups rice', '200g chicken')\n" +
+                    "- NEVER list the same food item twice in different forms. For example, if you see a fried chicken piece, list ONLY '1 fried chicken piece (~80g)' - do NOT also list '100g cooked chicken' separately. Each physical item on the plate should appear exactly once.\n" +
+                    "- If a protein (chicken, fish, meat) is fried or breaded, list it as the fried version with its approximate weight. Do not split it into 'cooked meat' + 'fried piece'.\n" +
                     "- Include cooking oils, spices, and garnishes you can reasonably infer\n" +
                     "- If unsure about the dish, give your best guess and set confidence to low\n" +
                     "- Be specific with quantities based on what looks like a single serving\n\n" +
@@ -106,6 +108,7 @@ export async function POST(req: Request) {
         `"rating_reason":string,` +
         `"improvements":[{"tip":string,"impact":string}]}\n\n` +
         `CRITICAL RULES for accuracy:\n` +
+        `- FIRST: Scan the ingredient list for duplicates. If the same food appears twice in different forms (e.g. "100g cooked chicken" AND "1 fried chicken piece"), count it ONLY ONCE using the more specific entry. Do not double-count.\n` +
         `- Use USDA nutritional data as your reference\n` +
         `- Calculate each ingredient individually then sum up. Show your work mentally.\n` +
         `- Common reference points per 100g raw:\n` +
@@ -115,6 +118,9 @@ export async function POST(req: Request) {
         `  Chicken breast: 165cal, 31g protein, 0g carbs, 3.6g fat\n` +
         `  Cooking oil (1 tbsp/15ml): 120cal, 0g protein, 0g carbs, 14g fat\n` +
         `  Lentils/dal (cooked 100g): 116cal, 9g protein, 20g carbs, 0.4g fat\n` +
+        `  Fried chicken (1 small piece ~80g with breading): ~190cal, 15g protein, 7g carbs, 12g fat\n` +
+        `  Chickpeas (cooked 100g): 164cal, 9g protein, 27g carbs, 2.6g fat\n` +
+        `  Mixed salad greens (100g): 15cal, 1.3g protein, 2.2g carbs, 0.2g fat\n` +
         `- Do NOT inflate protein for vegetable-only dishes. Vegetables have very little protein.\n` +
         `- A pure veggie dish (no meat/dal/paneer/eggs) with 200g vegetables typically has 3-6g protein total, not 10+\n` +
         `- CRITICAL: The ingredients listed may be for a FULL BATCH, not one serving. You MUST:\n` +
