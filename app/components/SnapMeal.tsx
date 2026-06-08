@@ -101,7 +101,25 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
       } else {
         setIdentified(d);
         setEditIngredients([...(d.ingredients || [])]);
-        setStep("review");
+
+        // If a nutrition label was detected, skip to results directly
+        if (d.has_nutrition_label && d.label_nutrition) {
+          const ln = d.label_nutrition;
+          setNutrition({
+            calories: ln.calories || 0,
+            protein_g: ln.protein_g || 0,
+            carbs_g: ln.carbs_g || 0,
+            fat_g: ln.fat_g || 0,
+            fiber_g: ln.fiber_g || 0,
+            serving_size: ln.serving_size || "1 serving",
+            rating: ln.calories < 500 && ln.protein_g > 15 ? "good" : ln.protein_g > 25 ? "excellent" : "fair",
+            rating_reason: "Values read directly from nutrition label",
+            improvements: [],
+          });
+          setStep("results");
+        } else {
+          setStep("review");
+        }
       }
     } catch {
       setError("Could not analyze the photo. Try again.");

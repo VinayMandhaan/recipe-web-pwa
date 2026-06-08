@@ -489,7 +489,7 @@ function AddMealModal({
     setScanning(true);
     setScanError(null);
     try {
-      // Step 1: Identify dish + ingredients
+      // Step 1: Identify dish + ingredients (also reads nutrition labels)
       const idRes = await fetch("/api/analyze-meal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -498,26 +498,36 @@ function AddMealModal({
       const idData = await idRes.json();
       if (idData.error) { setScanError(idData.error); setScanning(false); return; }
 
-      // Step 2: Get nutrition
-      const nutRes = await fetch("/api/analyze-meal", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          step: "nutrition",
-          ingredients: idData.ingredients || [],
-          dish: idData.dish || "Unknown dish",
-        }),
-      });
-      const nutData = await nutRes.json();
-      if (nutData.error) { setScanError(nutData.error); setScanning(false); return; }
+      // If a nutrition label was detected, use those exact values
+      if (idData.has_nutrition_label && idData.label_nutrition) {
+        const ln = idData.label_nutrition;
+        setName(idData.dish || "");
+        setCal(Math.round(ln.calories || 0).toString());
+        setPro(Math.round(ln.protein_g || 0).toString());
+        setCarb(Math.round(ln.carbs_g || 0).toString());
+        setFat(Math.round(ln.fat_g || 0).toString());
+        setMode("manual");
+      } else {
+        // Step 2: Estimate nutrition from ingredients (no label visible)
+        const nutRes = await fetch("/api/analyze-meal", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            step: "nutrition",
+            ingredients: idData.ingredients || [],
+            dish: idData.dish || "Unknown dish",
+          }),
+        });
+        const nutData = await nutRes.json();
+        if (nutData.error) { setScanError(nutData.error); setScanning(false); return; }
 
-      // Auto-fill the form
-      setName(idData.dish || "");
-      setCal(Math.round(nutData.calories || 0).toString());
-      setPro(Math.round(nutData.protein_g || 0).toString());
-      setCarb(Math.round(nutData.carbs_g || 0).toString());
-      setFat(Math.round(nutData.fat_g || 0).toString());
-      setMode("manual"); // switch to form view so user can review/edit
+        setName(idData.dish || "");
+        setCal(Math.round(nutData.calories || 0).toString());
+        setPro(Math.round(nutData.protein_g || 0).toString());
+        setCarb(Math.round(nutData.carbs_g || 0).toString());
+        setFat(Math.round(nutData.fat_g || 0).toString());
+        setMode("manual");
+      }
     } catch {
       setScanError("Could not analyze the photo. Try again.");
     } finally {

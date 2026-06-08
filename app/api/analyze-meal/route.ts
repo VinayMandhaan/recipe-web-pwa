@@ -42,15 +42,24 @@ export async function POST(req: Request) {
                 {
                   type: "text",
                   text:
-                    "Look at this food photo. Identify the dish and list all likely ingredients.\n\n" +
-                    "Return ONLY valid JSON, no markdown:\n" +
-                    '{"dish":string,"ingredients":[string],"confidence":"high"|"medium"|"low"}\n\n' +
-                    "Rules:\n" +
+                    "Look at this food photo carefully.\n\n" +
+                    "FIRST: Check if there is a visible NUTRITION FACTS LABEL or packaged food with nutritional info printed on it.\n\n" +
+                    "IF a nutrition label IS visible, READ the exact values from the label and return:\n" +
+                    '{"dish":string,"ingredients":[string],"confidence":"high","has_nutrition_label":true,' +
+                    '"label_nutrition":{"calories":number,"protein_g":number,"carbs_g":number,"fat_g":number,"fiber_g":number,"serving_size":string}}\n\n' +
+                    "- Read calories, protein, total carbohydrate, total fat, and fiber EXACTLY as printed\n" +
+                    "- Do NOT estimate or round. Copy the numbers from the label precisely\n" +
+                    "- For serving_size, read it from the label (e.g. '8.45 fl oz (250 mL)')\n" +
+                    "- For dish, use the product name visible on the package\n\n" +
+                    "IF there is NO nutrition label (it's a plate of food, a cooked meal, etc.), return:\n" +
+                    '{"dish":string,"ingredients":[string],"confidence":"high"|"medium"|"low","has_nutrition_label":false}\n\n' +
+                    "Rules for meals without labels:\n" +
                     "- Name the dish in English\n" +
                     "- List all visible and likely ingredients with approximate quantities (e.g. '2 cups rice', '200g chicken')\n" +
                     "- Include cooking oils, spices, and garnishes you can reasonably infer\n" +
                     "- If unsure about the dish, give your best guess and set confidence to low\n" +
-                    "- Be specific with quantities based on what looks like a single serving",
+                    "- Be specific with quantities based on what looks like a single serving\n\n" +
+                    "Return ONLY valid JSON, no markdown.",
                 },
                 {
                   type: "image_url",
