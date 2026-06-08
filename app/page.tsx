@@ -7,10 +7,11 @@ import BottomTabs from "./components/BottomTabs";
 import HomeTab from "./components/HomeTab";
 import RecipesTab from "./components/RecipesTab";
 import PlanTab from "./components/PlanTab";
+import MacrosTab from "./components/MacrosTab";
 import HistoryTab from "./components/HistoryTab";
 import AccountTab from "./components/AccountTab";
 
-type Tab = "home" | "recipes" | "plan" | "history" | "account";
+type Tab = "home" | "recipes" | "plan" | "macros" | "history" | "account";
 
 function AppShell() {
   const { user, loading } = useAuth();
@@ -41,6 +42,7 @@ function AppShell() {
         {activeTab === "home" && <HomeTab />}
         {activeTab === "recipes" && <RecipesTab />}
         {activeTab === "plan" && <PlanTab />}
+        {activeTab === "macros" && <MacrosTab />}
         {activeTab === "history" && <HistoryTab />}
         {activeTab === "account" && <AccountTab />}
         <BottomTabs active={activeTab} onChange={setActiveTab} />
