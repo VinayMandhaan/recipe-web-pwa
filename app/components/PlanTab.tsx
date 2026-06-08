@@ -322,7 +322,9 @@ export default function PlanTab() {
 
       {/* Recipe picker overlay */}
       {showRecipePicker && (
-        <div className="fixed inset-0 z-50 bg-[#0a0a0f] flex flex-col safe-top safe-bottom">
+        <div className="fixed inset-0 z-50 bg-[#06060a] flex justify-center">
+        <div className="flex flex-col w-full max-w-[480px] bg-[#0a0a0f] safe-top safe-bottom
+                        lg:border-x lg:border-[#2a2a3a]">
           <div className="flex items-center gap-3 px-5 py-4 border-b border-[#2a2a3a]">
             <button
               onClick={() => setShowRecipePicker(false)}
@@ -368,6 +370,7 @@ export default function PlanTab() {
               </div>
             )}
           </div>
+        </div>
         </div>
       )}
 

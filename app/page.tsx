@@ -19,11 +19,14 @@ function AppShell() {
   // Loading splash
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-dvh bg-[#0a0a0f]">
-        <div className="w-16 h-16 rounded-2xl gradient-accent flex items-center justify-center mb-4">
-          <span className="text-3xl">🍳</span>
+      <div className="h-dvh bg-[#06060a] flex justify-center">
+        <div className="flex flex-col items-center justify-center h-full w-full max-w-[480px] bg-[#0a0a0f]
+                        lg:border-x lg:border-[#2a2a3a]">
+          <div className="w-16 h-16 rounded-2xl gradient-accent flex items-center justify-center mb-4">
+            <span className="text-3xl">🍳</span>
+          </div>
+          <div className="w-5 h-5 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mt-4" />
         </div>
-        <div className="w-5 h-5 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mt-4" />
       </div>
     );
   }
@@ -32,13 +35,16 @@ function AppShell() {
   if (!user) return <AuthScreen />;
 
   return (
-    <div className="flex flex-col h-dvh bg-[#0a0a0f] safe-top">
-      {activeTab === "home" && <HomeTab />}
-      {activeTab === "recipes" && <RecipesTab />}
-      {activeTab === "plan" && <PlanTab />}
-      {activeTab === "history" && <HistoryTab />}
-      {activeTab === "account" && <AccountTab />}
-      <BottomTabs active={activeTab} onChange={setActiveTab} />
+    <div className="h-dvh bg-[#06060a] flex justify-center">
+      <div className="flex flex-col h-full w-full max-w-[480px] bg-[#0a0a0f] relative
+                      lg:border-x lg:border-[#2a2a3a] lg:shadow-2xl safe-top">
+        {activeTab === "home" && <HomeTab />}
+        {activeTab === "recipes" && <RecipesTab />}
+        {activeTab === "plan" && <PlanTab />}
+        {activeTab === "history" && <HistoryTab />}
+        {activeTab === "account" && <AccountTab />}
+        <BottomTabs active={activeTab} onChange={setActiveTab} />
+      </div>
     </div>
   );
 }

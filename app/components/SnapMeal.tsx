@@ -189,7 +189,9 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#0a0a0f] flex flex-col safe-top safe-bottom">
+    <div className="fixed inset-0 z-50 bg-[#06060a] flex justify-center">
+    <div className="flex flex-col w-full max-w-[480px] bg-[#0a0a0f] safe-top safe-bottom
+                    lg:border-x lg:border-[#2a2a3a]">
       {/* Header */}
       <div className="flex items-center gap-3 px-5 py-4 border-b border-[#2a2a3a]">
         <button onClick={onClose} className="p-1 -ml-1 text-[#8888a0] active:text-[#f0f0f5]">
@@ -605,6 +607,7 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
           </button>
         </div>
       )}
+    </div>
     </div>
   );
 }

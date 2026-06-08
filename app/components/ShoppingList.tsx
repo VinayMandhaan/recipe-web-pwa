@@ -112,7 +112,9 @@ export default function ShoppingList({
   const checkedCount = items.filter((i) => i.checked).length;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#0a0a0f]">
+    <div className="fixed inset-0 z-50 bg-[#06060a] flex justify-center">
+    <div className="flex flex-col w-full max-w-[480px] bg-[#0a0a0f]
+                    lg:border-x lg:border-[#2a2a3a]">
       {/* Header */}
       <div className="glass border-b border-[#2a2a3a] px-4 py-3 flex items-center justify-between safe-top">
         <button onClick={onClose} className="text-[#8888a0] hover:text-[#f0f0f5] text-sm font-medium flex items-center gap-1">
@@ -194,6 +196,7 @@ export default function ShoppingList({
           </button>
         </div>
       </div>
+    </div>
     </div>
   );
 }

@@ -33,7 +33,9 @@ export default function AuthScreen() {
   }
 
   return (
-    <div className="flex flex-col min-h-dvh bg-[#0a0a0f] safe-top safe-bottom">
+    <div className="min-h-dvh bg-[#06060a] flex justify-center">
+    <div className="flex flex-col min-h-dvh w-full max-w-[480px] bg-[#0a0a0f] safe-top safe-bottom
+                    lg:border-x lg:border-[#2a2a3a] lg:shadow-2xl">
       {/* Top section */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 pb-4">
         {/* Logo */}
@@ -121,6 +123,7 @@ export default function AuthScreen() {
           </button>
         </p>
       </div>
+    </div>
     </div>
   );
 }
