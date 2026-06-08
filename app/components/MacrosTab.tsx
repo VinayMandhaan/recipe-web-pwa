@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "./AuthProvider";
 import {
   calculateMacros,
@@ -426,7 +426,7 @@ function ProfileSetup({
   );
 }
 
-// ── Add meal modal ──
+// ── Add meal modal with photo scan ──
 function AddMealModal({
   mealType,
   onClose,
@@ -438,76 +438,305 @@ function AddMealModal({
   onAdd: (meal: { dish_name: string; calories: number; protein: number; carbs: number; fat: number }) => void;
   adding: boolean;
 }) {
+  const [mode, setMode] = useState<"choose" | "manual" | "photo">("choose");
   const [name, setName] = useState("");
   const [cal, setCal] = useState("");
   const [pro, setPro] = useState("");
   const [carb, setCarb] = useState("");
   const [fat, setFat] = useState("");
 
+  // Photo scan state
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [scanning, setScanning] = useState(false);
+  const [scanError, setScanError] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
   const inputCls =
     "w-full px-3 py-2.5 bg-[#0a0a0f] border border-[#2a2a3a] rounded-xl text-sm text-[#f0f0f5] focus:outline-none focus:ring-1 focus:ring-orange-500/50 placeholder:text-[#3a3a4a]";
 
   const mealInfo = MEAL_TYPES.find((m) => m.key === mealType);
 
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const maxSize = 1024;
+        let w = img.width;
+        let h = img.height;
+        if (w > maxSize || h > maxSize) {
+          if (w > h) { h = Math.round((h * maxSize) / w); w = maxSize; }
+          else { w = Math.round((w * maxSize) / h); h = maxSize; }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+        setImagePreview(dataUrl);
+        runScan(dataUrl);
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function runScan(dataUrl: string) {
+    setScanning(true);
+    setScanError(null);
+    try {
+      // Step 1: Identify dish + ingredients
+      const idRes = await fetch("/api/analyze-meal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ step: "identify", image: dataUrl }),
+      });
+      const idData = await idRes.json();
+      if (idData.error) { setScanError(idData.error); setScanning(false); return; }
+
+      // Step 2: Get nutrition
+      const nutRes = await fetch("/api/analyze-meal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          step: "nutrition",
+          ingredients: idData.ingredients || [],
+          dish: idData.dish || "Unknown dish",
+        }),
+      });
+      const nutData = await nutRes.json();
+      if (nutData.error) { setScanError(nutData.error); setScanning(false); return; }
+
+      // Auto-fill the form
+      setName(idData.dish || "");
+      setCal(Math.round(nutData.calories || 0).toString());
+      setPro(Math.round(nutData.protein_g || 0).toString());
+      setCarb(Math.round(nutData.carbs_g || 0).toString());
+      setFat(Math.round(nutData.fat_g || 0).toString());
+      setMode("manual"); // switch to form view so user can review/edit
+    } catch {
+      setScanError("Could not analyze the photo. Try again.");
+    } finally {
+      setScanning(false);
+    }
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative w-full max-w-[480px] bg-[#16161e] rounded-t-2xl border-t border-[#2a2a3a] p-5 pb-8 animate-slide-up">
+      <div className="relative w-full max-w-[480px] bg-[#16161e] rounded-t-2xl border-t border-[#2a2a3a] p-5 pb-8 animate-slide-up max-h-[85vh] overflow-y-auto no-scrollbar">
         <div className="w-10 h-1 bg-[#2a2a3a] rounded-full mx-auto mb-4" />
-        <h2 className="text-lg font-bold text-[#f0f0f5] mb-1">
-          {mealInfo?.emoji} Add to {mealInfo?.label}
-        </h2>
-        <p className="text-xs text-[#3a3a4a] mb-4">Enter the dish name and nutritional values</p>
 
-        <div className="space-y-3">
-          <div>
-            <label className="text-[10px] text-[#55556a] mb-1 block">Dish name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Chicken biryani"
-              className={inputCls}
-              autoFocus
-            />
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+
+        {/* Mode: Choose */}
+        {mode === "choose" && !scanning && (
+          <>
+            <h2 className="text-lg font-bold text-[#f0f0f5] mb-1">
+              {mealInfo?.emoji} Add to {mealInfo?.label}
+            </h2>
+            <p className="text-xs text-[#3a3a4a] mb-5">How would you like to log this meal?</p>
+
+            <div className="space-y-3">
+              {/* Photo scan option */}
+              <button
+                onClick={() => {
+                  if (fileRef.current) {
+                    fileRef.current.setAttribute("capture", "environment");
+                    fileRef.current.click();
+                  }
+                }}
+                className="w-full flex items-center gap-4 p-4 bg-orange-500/5 border border-orange-500/20 rounded-xl
+                           active:bg-orange-500/10 transition-colors text-left"
+              >
+                <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
+                  <svg className="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-orange-400">Take a photo</p>
+                  <p className="text-[10px] text-[#55556a] mt-0.5">AI scans your meal and fills macros automatically</p>
+                </div>
+              </button>
+
+              {/* Upload option */}
+              <button
+                onClick={() => {
+                  if (fileRef.current) {
+                    fileRef.current.removeAttribute("capture");
+                    fileRef.current.click();
+                  }
+                }}
+                className="w-full flex items-center gap-4 p-4 bg-[#0a0a0f] border border-[#2a2a3a] rounded-xl
+                           active:bg-[#1e1e2a] transition-colors text-left"
+              >
+                <div className="w-12 h-12 rounded-xl bg-[#16161e] border border-[#2a2a3a] flex items-center justify-center shrink-0">
+                  <svg className="w-6 h-6 text-[#55556a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-[#c0c0d0]">Upload photo</p>
+                  <p className="text-[10px] text-[#55556a] mt-0.5">Pick from gallery for AI analysis</p>
+                </div>
+              </button>
+
+              {/* Manual entry option */}
+              <button
+                onClick={() => setMode("manual")}
+                className="w-full flex items-center gap-4 p-4 bg-[#0a0a0f] border border-[#2a2a3a] rounded-xl
+                           active:bg-[#1e1e2a] transition-colors text-left"
+              >
+                <div className="w-12 h-12 rounded-xl bg-[#16161e] border border-[#2a2a3a] flex items-center justify-center shrink-0">
+                  <svg className="w-6 h-6 text-[#55556a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-[#c0c0d0]">Type manually</p>
+                  <p className="text-[10px] text-[#55556a] mt-0.5">Enter dish name and macros yourself</p>
+                </div>
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Scanning spinner */}
+        {scanning && (
+          <div className="py-6">
+            {imagePreview && (
+              <img
+                src={imagePreview}
+                alt="Meal"
+                className="w-full aspect-[4/3] object-cover rounded-2xl border border-[#2a2a3a] mb-4"
+              />
+            )}
+            <div className="flex items-center justify-center gap-3 py-4">
+              <span className="w-5 h-5 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+              <span className="text-sm text-[#55556a]">Analyzing your meal...</span>
+            </div>
+            <div className="space-y-2 mt-2">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-3.5 shimmer rounded w-full" />
+              ))}
+            </div>
           </div>
+        )}
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-[10px] text-[#55556a] mb-1 block">Calories (kcal)</label>
-              <input type="number" value={cal} onChange={(e) => setCal(e.target.value)} placeholder="0" className={inputCls} />
-            </div>
-            <div>
-              <label className="text-[10px] text-[#55556a] mb-1 block">Protein (g)</label>
-              <input type="number" value={pro} onChange={(e) => setPro(e.target.value)} placeholder="0" className={inputCls} />
-            </div>
-            <div>
-              <label className="text-[10px] text-[#55556a] mb-1 block">Carbs (g)</label>
-              <input type="number" value={carb} onChange={(e) => setCarb(e.target.value)} placeholder="0" className={inputCls} />
-            </div>
-            <div>
-              <label className="text-[10px] text-[#55556a] mb-1 block">Fat (g)</label>
-              <input type="number" value={fat} onChange={(e) => setFat(e.target.value)} placeholder="0" className={inputCls} />
-            </div>
+        {/* Scan error */}
+        {scanError && (
+          <div className="mb-4 bg-red-500/10 border border-red-500/20 rounded-xl p-3 text-red-400 text-xs">
+            {scanError}
+            <button onClick={() => { setScanError(null); setMode("choose"); }} className="block mt-1 underline text-red-400/70">
+              Try again
+            </button>
           </div>
+        )}
 
-          <button
-            onClick={() =>
-              onAdd({
-                dish_name: name.trim(),
-                calories: Number(cal) || 0,
-                protein: Number(pro) || 0,
-                carbs: Number(carb) || 0,
-                fat: Number(fat) || 0,
-              })
-            }
-            disabled={!name.trim() || adding}
-            className="w-full py-3 bg-orange-500 text-white font-semibold rounded-xl
-                       active:bg-orange-600 transition-colors disabled:opacity-50 mt-1"
-          >
-            {adding ? "Adding..." : "Add meal"}
-          </button>
-        </div>
+        {/* Mode: Manual (also shown after photo scan with auto-filled values) */}
+        {mode === "manual" && !scanning && (
+          <>
+            <h2 className="text-lg font-bold text-[#f0f0f5] mb-1">
+              {mealInfo?.emoji} Add to {mealInfo?.label}
+            </h2>
+
+            {imagePreview && (
+              <div className="mb-3">
+                <img
+                  src={imagePreview}
+                  alt="Meal"
+                  className="w-full aspect-[3/2] object-cover rounded-xl border border-[#2a2a3a]"
+                />
+                <p className="text-[10px] text-green-400 mt-1.5 flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                  </svg>
+                  AI-filled values below. Edit if needed.
+                </p>
+              </div>
+            )}
+
+            {!imagePreview && (
+              <p className="text-xs text-[#3a3a4a] mb-4">Enter the dish name and nutritional values</p>
+            )}
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-[10px] text-[#55556a] mb-1 block">Dish name</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g., Chicken biryani"
+                  className={inputCls}
+                  autoFocus={!imagePreview}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] text-[#55556a] mb-1 block">Calories (kcal)</label>
+                  <input type="number" value={cal} onChange={(e) => setCal(e.target.value)} placeholder="0" className={inputCls} />
+                </div>
+                <div>
+                  <label className="text-[10px] text-[#55556a] mb-1 block">Protein (g)</label>
+                  <input type="number" value={pro} onChange={(e) => setPro(e.target.value)} placeholder="0" className={inputCls} />
+                </div>
+                <div>
+                  <label className="text-[10px] text-[#55556a] mb-1 block">Carbs (g)</label>
+                  <input type="number" value={carb} onChange={(e) => setCarb(e.target.value)} placeholder="0" className={inputCls} />
+                </div>
+                <div>
+                  <label className="text-[10px] text-[#55556a] mb-1 block">Fat (g)</label>
+                  <input type="number" value={fat} onChange={(e) => setFat(e.target.value)} placeholder="0" className={inputCls} />
+                </div>
+              </div>
+
+              <button
+                onClick={() =>
+                  onAdd({
+                    dish_name: name.trim(),
+                    calories: Number(cal) || 0,
+                    protein: Number(pro) || 0,
+                    carbs: Number(carb) || 0,
+                    fat: Number(fat) || 0,
+                  })
+                }
+                disabled={!name.trim() || adding}
+                className="w-full py-3 bg-orange-500 text-white font-semibold rounded-xl
+                           active:bg-orange-600 transition-colors disabled:opacity-50 mt-1"
+              >
+                {adding ? "Adding..." : "Add meal"}
+              </button>
+
+              {/* Back to choose mode */}
+              {!imagePreview && (
+                <button
+                  onClick={() => setMode("choose")}
+                  className="w-full py-2 text-xs text-[#55556a] active:text-[#8888a0] transition-colors"
+                >
+                  Back
+                </button>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
