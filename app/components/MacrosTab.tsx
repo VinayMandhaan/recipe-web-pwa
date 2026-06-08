@@ -499,15 +499,15 @@ function AddMealModal({
       if (idData.error) { setScanError(idData.error); setScanning(false); return; }
 
       // If a nutrition label was detected, use those exact values
-      if (idData.has_nutrition_label && idData.label_nutrition) {
-        const ln = idData.label_nutrition;
+      const ln = idData.label_nutrition;
+      if (ln && (ln.calories || ln.protein_g)) {
         setName(idData.dish || "");
         setCal(Math.round(ln.calories || 0).toString());
         setPro(Math.round(ln.protein_g || 0).toString());
         setCarb(Math.round(ln.carbs_g || 0).toString());
         setFat(Math.round(ln.fat_g || 0).toString());
         setMode("manual");
-      } else {
+      } else if (idData.ingredients && idData.ingredients.length > 0) {
         // Step 2: Estimate nutrition from ingredients (no label visible)
         const nutRes = await fetch("/api/analyze-meal", {
           method: "POST",
@@ -526,6 +526,11 @@ function AddMealModal({
         setPro(Math.round(nutData.protein_g || 0).toString());
         setCarb(Math.round(nutData.carbs_g || 0).toString());
         setFat(Math.round(nutData.fat_g || 0).toString());
+        setMode("manual");
+      } else {
+        // No label and no ingredients - let user type manually
+        setName(idData.dish || "");
+        setScanError("Could not read nutrition info. Enter values manually.");
         setMode("manual");
       }
     } catch {

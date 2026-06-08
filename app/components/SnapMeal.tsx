@@ -103,8 +103,8 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
         setEditIngredients([...(d.ingredients || [])]);
 
         // If a nutrition label was detected, skip to results directly
-        if (d.has_nutrition_label && d.label_nutrition) {
-          const ln = d.label_nutrition;
+        const ln = d.label_nutrition;
+        if (ln && (ln.calories || ln.protein_g)) {
           setNutrition({
             calories: ln.calories || 0,
             protein_g: ln.protein_g || 0,
