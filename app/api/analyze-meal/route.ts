@@ -55,12 +55,20 @@ export async function POST(req: Request) {
                     '{"dish":string,"ingredients":[string],"confidence":"high"|"medium"|"low","has_nutrition_label":false}\n\n' +
                     "Rules for meals without labels:\n" +
                     "- Name the dish in English\n" +
-                    "- List all visible and likely ingredients with approximate quantities (e.g. '2 cups rice', '200g chicken')\n" +
-                    "- NEVER list the same food item twice in different forms. For example, if you see a fried chicken piece, list ONLY '1 fried chicken piece (~80g)' - do NOT also list '100g cooked chicken' separately. Each physical item on the plate should appear exactly once.\n" +
+                    "- List all visible and likely ingredients with approximate quantities\n" +
+                    "- CRITICAL: Do NOT overestimate quantities. Most people photograph single servings, not family-sized portions. Use these visual anchors:\n" +
+                    "  * A loose handful of salad greens = ~30-40g, a bowlful = ~60-80g (NOT 200g, that would overflow most plates)\n" +
+                    "  * A small fried chicken piece/wing = ~50-60g, a thigh = ~80-100g, a breast = ~120-150g\n" +
+                    "  * A spoonful of chickpeas/beans = ~30g, a small scattering on a salad = ~30-50g\n" +
+                    "  * A few slices of onion = ~10g, a ring or two = ~5g\n" +
+                    "  * A tablespoon of corn kernels = ~10g\n" +
+                    "  * 1 cup cooked rice = ~150-180g, half a plate = ~200g\n" +
+                    "  * 1 roti/chapati = ~30-40g\n" +
+                    "- When in doubt, estimate LOWER rather than higher. Underestimating by 20% is better than overestimating by 50%.\n" +
+                    "- NEVER list the same food item twice in different forms. For example, if you see a fried chicken piece, list ONLY '1 fried chicken piece (~60g)' - do NOT also list '100g cooked chicken' separately. Each physical item on the plate should appear exactly once.\n" +
                     "- If a protein (chicken, fish, meat) is fried or breaded, list it as the fried version with its approximate weight. Do not split it into 'cooked meat' + 'fried piece'.\n" +
                     "- Include cooking oils, spices, and garnishes you can reasonably infer\n" +
                     "- If unsure about the dish, give your best guess and set confidence to low\n" +
-                    "- Be specific with quantities based on what looks like a single serving\n\n" +
                     "Return ONLY valid JSON, no markdown.",
                 },
                 {
