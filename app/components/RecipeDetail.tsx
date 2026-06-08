@@ -84,6 +84,9 @@ export default function RecipeDetail({
   const [nutrition, setNutrition] = useState<NutritionData | null>(null);
   const [nutritionLoading, setNutritionLoading] = useState(false);
   const [showNutrition, setShowNutrition] = useState(false);
+  const [swapIndex, setSwapIndex] = useState<number | null>(null);
+  const [swapLoading, setSwapLoading] = useState(false);
+  const [swaps, setSwaps] = useState<{ name: string; quantity: string; note: string }[]>([]);
   const stageInfo = stage ? STAGE_LABELS[stage] : null;
   const currentTag = TAGS.find((t) => t.key === tag);
 
@@ -103,6 +106,23 @@ export default function RecipeDetail({
     } catch { /* silent */ }
     setNutritionLoading(false);
   }, [ingredients, dish, nutrition, nutritionLoading]);
+
+  async function handleSwap(index: number) {
+    if (swapIndex === index) { setSwapIndex(null); setSwaps([]); return; }
+    setSwapIndex(index);
+    setSwaps([]);
+    setSwapLoading(true);
+    try {
+      const res = await fetch("/api/swap", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ingredient: scaledIngredients[index], dish }),
+      });
+      const d = await res.json();
+      if (d.swaps) setSwaps(d.swaps);
+    } catch { /* silent */ }
+    setSwapLoading(false);
+  }
 
   function handleNutritionToggle() {
     setShowNutrition(!showNutrition);
@@ -223,14 +243,53 @@ export default function RecipeDetail({
 
             {/* Ingredients */}
             <div className="bg-[#16161e] border border-[#2a2a3a] rounded-2xl p-5">
-              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-[#55556a] mb-3">
-                Ingredients {servingMultiplier !== 1 && `(${servingMultiplier}x)`}
-              </h3>
-              <ul className="space-y-2">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-[10px] font-semibold uppercase tracking-wider text-[#55556a]">
+                  Ingredients {servingMultiplier !== 1 && `(${servingMultiplier}x)`}
+                </h3>
+                <p className="text-[9px] text-[#3a3a4a]">Tap for substitutes</p>
+              </div>
+              <ul className="space-y-1.5">
                 {scaledIngredients.map((ing, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm text-[#c0c0d0]">
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
-                    {ing}
+                  <li key={i}>
+                    <button
+                      onClick={() => handleSwap(i)}
+                      className={`w-full flex items-start gap-2.5 text-sm text-left rounded-xl px-2.5 py-2 -mx-2.5 transition-colors ${
+                        swapIndex === i ? "bg-orange-500/10" : "active:bg-white/5"
+                      }`}
+                    >
+                      <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
+                      <span className={swapIndex === i ? "text-orange-400" : "text-[#c0c0d0]"}>{ing}</span>
+                      {swapIndex === i && (
+                        <svg className="w-3.5 h-3.5 text-orange-500 shrink-0 mt-0.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                        </svg>
+                      )}
+                    </button>
+                    {/* Swap suggestions */}
+                    {swapIndex === i && (
+                      <div className="ml-5 mt-1 mb-2 space-y-1.5">
+                        {swapLoading ? (
+                          <div className="flex items-center gap-2 py-2">
+                            <span className="w-3.5 h-3.5 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+                            <span className="text-[11px] text-[#55556a]">Finding substitutes...</span>
+                          </div>
+                        ) : swaps.length > 0 ? (
+                          swaps.map((s, si) => (
+                            <div key={si} className="bg-[#0a0a0f] rounded-lg px-3 py-2">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs">🔄</span>
+                                <span className="text-xs font-medium text-[#f0f0f5]">{s.name}</span>
+                              </div>
+                              <p className="text-[10px] text-orange-400/70 mt-0.5">{s.quantity}</p>
+                              <p className="text-[10px] text-[#55556a] mt-0.5">{s.note}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-[10px] text-[#3a3a4a] py-1">No substitutes found</p>
+                        )}
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>

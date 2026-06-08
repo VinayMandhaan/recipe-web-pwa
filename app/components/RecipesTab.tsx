@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "./AuthProvider";
 import RecipeDetail from "./RecipeDetail";
 import ShoppingList from "./ShoppingList";
+import { detectDietaryTags } from "@/lib/dietary";
 
 interface SavedRecipe {
   id: string;
@@ -202,6 +203,7 @@ export default function RecipesTab() {
           <div className="px-5 pb-6 space-y-3">
             {filtered.map((r) => {
               const tagInfo = TAGS.find((t) => t.key === r.tag);
+              const dietaryTags = detectDietaryTags(r.ingredients);
               return (
                 <button
                   key={r.id}
@@ -226,6 +228,18 @@ export default function RecipesTab() {
                           {r.steps.length} steps
                         </span>
                       </div>
+                      {dietaryTags.length > 0 && (
+                        <div className="flex gap-1.5 mt-2 flex-wrap">
+                          {dietaryTags.slice(0, 3).map((dt) => (
+                            <span key={dt.key} className={`text-[9px] font-medium px-1.5 py-0.5 rounded border ${dt.color}`}>
+                              {dt.emoji} {dt.label}
+                            </span>
+                          ))}
+                          {dietaryTags.length > 3 && (
+                            <span className="text-[9px] text-[#3a3a4a]">+{dietaryTags.length - 3}</span>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <svg className="w-4 h-4 text-[#3a3a4a] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

@@ -174,6 +174,16 @@ export default function HomeTab() {
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
   const [showSnapMeal, setShowSnapMeal] = useState(false);
+  const [showLeftover, setShowLeftover] = useState(false);
+  const [fridgeInput, setFridgeInput] = useState("");
+  const [leftoverLoading, setLeftoverLoading] = useState(false);
+  const [leftoverMatches, setLeftoverMatches] = useState<{
+    id: string; dish: string; tag: string | null; ingredients: string[]; steps: string[];
+    percent: number; have: string[]; need: string[];
+  }[]>([]);
+  const [selectedLeftover, setSelectedLeftover] = useState<{
+    dish: string; ingredients: string[]; steps: string[];
+  } | null>(null);
 
   async function handleAiSuggest(query: string) {
     if (!user || aiLoading) return;
@@ -198,6 +208,22 @@ export default function HomeTab() {
       setAiLoading(false);
       setAiQuery("");
     }
+  }
+
+  async function handleLeftoverSearch() {
+    if (!user || !fridgeInput.trim() || leftoverLoading) return;
+    setLeftoverLoading(true);
+    setLeftoverMatches([]);
+    try {
+      const res = await fetch("/api/leftover", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: user.id, fridge_items: fridgeInput.trim() }),
+      });
+      const d = await res.json();
+      setLeftoverMatches(d.matches || []);
+    } catch { /* silent */ }
+    setLeftoverLoading(false);
   }
 
   async function handleExtract() {
@@ -479,6 +505,98 @@ export default function HomeTab() {
               </div>
             )}
 
+            {/* Leftover Mode */}
+            <div className="bg-[#16161e] border border-[#2a2a3a] rounded-2xl overflow-hidden">
+              <button
+                onClick={() => setShowLeftover(!showLeftover)}
+                className="w-full px-5 py-4 flex items-center justify-between active:bg-[#1e1e2a] transition-colors"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xl">🧊</span>
+                  <div className="text-left">
+                    <h3 className="text-sm font-semibold text-[#f0f0f5]">Leftover Mode</h3>
+                    <p className="text-[10px] text-[#55556a]">What can I cook with what I have?</p>
+                  </div>
+                </div>
+                <svg
+                  className={`w-4 h-4 text-[#55556a] transition-transform ${showLeftover ? "rotate-180" : ""}`}
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {showLeftover && (
+                <div className="px-5 pb-4 space-y-3">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={fridgeInput}
+                      onChange={(e) => setFridgeInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleLeftoverSearch()}
+                      placeholder="chicken, rice, onion, garlic..."
+                      className="flex-1 px-3.5 py-2.5 bg-[#0a0a0f] border border-[#2a2a3a] rounded-xl text-sm text-[#f0f0f5]
+                                 focus:outline-none focus:ring-1 focus:ring-orange-500/50
+                                 placeholder:text-[#3a3a4a]"
+                      disabled={leftoverLoading}
+                    />
+                    <button
+                      onClick={handleLeftoverSearch}
+                      disabled={leftoverLoading || !fridgeInput.trim()}
+                      className="px-4 py-2.5 gradient-accent text-white font-medium rounded-xl text-sm
+                                 active:opacity-80 disabled:opacity-30 shrink-0"
+                    >
+                      {leftoverLoading ? (
+                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
+                      ) : (
+                        "Find"
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Results */}
+                  {leftoverMatches.length > 0 && (
+                    <div className="space-y-2">
+                      {leftoverMatches.map((m) => (
+                        <button
+                          key={m.id}
+                          onClick={() => setSelectedLeftover(m)}
+                          className="w-full bg-[#0a0a0f] rounded-xl p-3 text-left active:bg-[#16161e] transition-colors"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-sm font-medium text-[#f0f0f5] truncate flex-1">{m.dish}</p>
+                            <span className={`text-xs font-bold shrink-0 ${
+                              m.percent >= 80 ? "text-green-400" :
+                              m.percent >= 50 ? "text-amber-400" : "text-red-400"
+                            }`}>
+                              {m.percent}%
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                            <span className="text-[10px] text-green-400/70">
+                              Have {m.have.length}
+                            </span>
+                            {m.need.length > 0 && (
+                              <>
+                                <span className="text-[10px] text-[#2a2a3a]">|</span>
+                                <span className="text-[10px] text-amber-400/70">
+                                  Need {m.need.length}: {m.need.slice(0, 2).join(", ")}{m.need.length > 2 ? "..." : ""}
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {leftoverMatches.length === 0 && !leftoverLoading && fridgeInput.trim() && (
+                    <p className="text-xs text-[#3a3a4a] text-center py-2">No matching recipes found. Save more recipes first!</p>
+                  )}
+                </div>
+              )}
+            </div>
+
             {/* Banner */}
             <div className="relative overflow-hidden rounded-2xl h-40 gradient-accent">
               <div className="absolute inset-0 flex items-center px-6">
@@ -554,6 +672,16 @@ export default function HomeTab() {
           ingredients={selectedSuggestion.ingredients}
           steps={selectedSuggestion.steps}
           onClose={() => setSelectedSuggestion(null)}
+        />
+      )}
+
+      {/* Leftover recipe detail */}
+      {selectedLeftover && (
+        <RecipeDetail
+          dish={selectedLeftover.dish}
+          ingredients={selectedLeftover.ingredients}
+          steps={selectedLeftover.steps}
+          onClose={() => setSelectedLeftover(null)}
         />
       )}
 
