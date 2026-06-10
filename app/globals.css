@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --bg-primary: #0a0a0f;
-  --bg-card: #16161e;
-  --bg-card-hover: #1e1e2a;
-  --bg-input: #1c1c28;
-  --border: #2a2a3a;
-  --text-primary: #f0f0f5;
-  --text-secondary: #8888a0;
-  --text-muted: #55556a;
-  --accent: #f97316;
-  --accent-dim: rgba(249, 115, 22, 0.15);
+  --bg-primary: #F9FAFB;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F3F4F6;
+  --bg-input: #F9FAFB;
+  --border: #E5E7EB;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  --accent: #3B82F6;
+  --accent-dim: rgba(59, 130, 246, 0.1);
 }
 
 @theme inline {
@@ -37,14 +37,14 @@ body {
 
 /* Glass card effect */
 .glass {
-  background: rgba(22, 22, 30, 0.8);
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
 
 /* Gradient accent */
 .gradient-accent {
-  background: linear-gradient(135deg, #f97316, #fb923c);
+  background: linear-gradient(135deg, #3B82F6, #60A5FA);
 }
 
 /* Shimmer animation for loading */
@@ -53,7 +53,7 @@ body {
   100% { background-position: 200% 0; }
 }
 .shimmer {
-  background: linear-gradient(90deg, #1c1c28 25%, #2a2a3a 50%, #1c1c28 75%);
+  background: linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 50%, #F3F4F6 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }

@@ -97,7 +97,7 @@ export default function BottomTabs({
   onChange: (tab: Tab) => void;
 }) {
   return (
-    <nav className="glass border-t border-[#2a2a3a] safe-bottom">
+    <nav className="bg-white/80 backdrop-blur-xl border-t border-gray-200 safe-bottom">
       <div className="flex items-center justify-around px-1 pt-2 pb-1">
         {tabs.map((tab) => {
           const isActive = active === tab.key;
@@ -106,7 +106,7 @@ export default function BottomTabs({
               key={tab.key}
               onClick={() => onChange(tab.key)}
               className={`flex flex-col items-center gap-0.5 py-1 px-1 rounded-xl transition-colors min-w-[44px]
-                ${isActive ? "text-orange-500" : "text-[#55556a]"}`}
+                ${isActive ? "text-blue-500" : "text-gray-400"}`}
             >
               {tab.icon(isActive)}
               <span className="text-[9px] font-medium">{tab.label}</span>

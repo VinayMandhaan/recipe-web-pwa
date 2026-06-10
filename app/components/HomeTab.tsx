@@ -12,7 +12,7 @@ interface ExtractResponse {
   caption: string;
   caption_ok: boolean;
   reason: string | null;
-  stage: "caption" | "blog" | "transcript" | "fallback";
+  stage: "caption" | "comments" | "blog" | "transcript" | "fallback";
   result: {
     is_recipe: boolean;
     dish: string;
@@ -51,9 +51,9 @@ const SUGGESTION_CHIPS = [
 ];
 
 const TYPE_BADGES: Record<string, { label: string; color: string; emoji: string }> = {
-  saved_match: { label: "From saved", emoji: "📌", color: "bg-green-500/15 text-green-400 border-green-500/20" },
-  adapted: { label: "Adapted", emoji: "🔄", color: "bg-purple-500/15 text-purple-400 border-purple-500/20" },
-  new: { label: "New recipe", emoji: "✨", color: "bg-orange-500/15 text-orange-400 border-orange-500/20" },
+  saved_match: { label: "From saved", emoji: "📌", color: "bg-green-50 text-green-600 border-green-200" },
+  adapted: { label: "Adapted", emoji: "🔄", color: "bg-purple-50 text-purple-600 border-purple-200" },
+  new: { label: "New recipe", emoji: "✨", color: "bg-blue-50 text-blue-600 border-blue-200" },
 };
 
 const TRENDING: DummyRecipe[] = [
@@ -268,13 +268,13 @@ export default function HomeTab() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto no-scrollbar">
+    <div className="flex-1 overflow-y-auto no-scrollbar bg-gray-50">
       {/* Hero */}
       <div className="px-5 pt-6 pb-4">
-        <h1 className="text-2xl font-bold text-[#f0f0f5]">
+        <h1 className="text-2xl font-bold text-gray-900">
           What are we cooking<br />today?
         </h1>
-        <p className="text-sm text-[#55556a] mt-1">
+        <p className="text-sm text-gray-400 mt-1">
           Paste a reel or video link to extract the recipe
         </p>
       </div>
@@ -283,7 +283,7 @@ export default function HomeTab() {
       <div className="px-5 pb-5">
         <div className="flex gap-2">
           <div className="flex-1 relative">
-            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#55556a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
             </svg>
             <input
@@ -292,17 +292,17 @@ export default function HomeTab() {
               onChange={(e) => setUrl(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !loading && handleExtract()}
               placeholder="Paste TikTok, Instagram, or YouTube link..."
-              className="w-full pl-10 pr-4 py-3 bg-[#16161e] border border-[#2a2a3a] rounded-xl text-sm text-[#f0f0f5]
-                         focus:outline-none focus:ring-1 focus:ring-orange-500/50 focus:border-orange-500/50
-                         placeholder:text-[#3a3a4a]"
+              className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900
+                         focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400
+                         placeholder:text-gray-400 transition-all"
               disabled={loading}
             />
           </div>
           <button
             onClick={handleExtract}
             disabled={loading || !url.trim()}
-            className="px-5 py-3 gradient-accent text-white font-semibold rounded-xl text-sm
-                       active:opacity-80 transition-opacity
+            className="px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-xl text-sm
+                       active:opacity-80 transition-opacity shadow-md shadow-blue-500/20
                        disabled:opacity-30 disabled:cursor-not-allowed
                        flex items-center gap-2 shrink-0"
           >
@@ -316,10 +316,10 @@ export default function HomeTab() {
           </button>
           <button
             onClick={() => setShowSnapMeal(true)}
-            className="px-3.5 py-3 bg-[#16161e] border border-[#2a2a3a] rounded-xl
-                       active:bg-orange-500/10 active:border-orange-500/20 transition-colors shrink-0"
+            className="px-3.5 py-3 bg-gray-50 border border-gray-200 rounded-xl
+                       active:bg-blue-50 active:border-blue-200 transition-colors shrink-0"
           >
-            <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -333,12 +333,12 @@ export default function HomeTab() {
       <div className="px-5 pb-6 space-y-5">
         {/* Loading */}
         {loading && (
-          <div className="bg-[#16161e] rounded-2xl border border-[#2a2a3a] p-5 space-y-3">
-            <div className="h-5 shimmer rounded w-3/4" />
-            <div className="h-4 shimmer rounded w-1/2" />
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
+            <div className="h-5 bg-gray-100 animate-pulse rounded w-3/4" />
+            <div className="h-4 bg-gray-100 animate-pulse rounded w-1/2" />
             <div className="space-y-2 mt-4">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-3.5 shimmer rounded w-full" />
+                <div key={i} className="h-3.5 bg-gray-100 animate-pulse rounded w-full" />
               ))}
             </div>
           </div>
@@ -346,7 +346,7 @@ export default function HomeTab() {
 
         {/* Error */}
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400 text-sm">
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-600 text-sm">
             {error}
           </div>
         )}
@@ -357,13 +357,13 @@ export default function HomeTab() {
         {/* Trending section (show when no result) */}
         {!data && !loading && !error && (
           <>
-            {/* AI Chef */}
-            <div className="bg-[#16161e] border border-[#2a2a3a] rounded-2xl overflow-hidden">
+            {/* Smart Chef */}
+            <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
               <div className="px-5 pt-4 pb-3 flex items-center gap-2.5">
-                <span className="text-xl">🤖</span>
+                <span className="text-xl">👨‍🍳</span>
                 <div>
-                  <h3 className="text-sm font-semibold text-[#f0f0f5]">AI Chef</h3>
-                  <p className="text-[10px] text-[#55556a]">Get personalized recipe suggestions</p>
+                  <h3 className="text-sm font-semibold text-gray-900">Smart Chef</h3>
+                  <p className="text-[10px] text-gray-400">Get personalized recipe suggestions</p>
                 </div>
               </div>
 
@@ -374,12 +374,12 @@ export default function HomeTab() {
                     key={chip.label}
                     onClick={() => handleAiSuggest(chip.query)}
                     disabled={aiLoading}
-                    className="shrink-0 px-3 py-2 bg-[#0a0a0f] border border-[#2a2a3a] rounded-xl
-                               active:bg-orange-500/10 active:border-orange-500/20 transition-colors
+                    className="shrink-0 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl
+                               active:bg-blue-50 active:border-blue-200 transition-colors
                                disabled:opacity-40 flex items-center gap-1.5"
                   >
                     <span className="text-sm">{chip.emoji}</span>
-                    <span className="text-xs text-[#8888a0] whitespace-nowrap">{chip.label}</span>
+                    <span className="text-xs text-gray-500 whitespace-nowrap">{chip.label}</span>
                   </button>
                 ))}
               </div>
@@ -393,15 +393,15 @@ export default function HomeTab() {
                     onChange={(e) => setAiQuery(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && aiQuery.trim() && handleAiSuggest(aiQuery.trim())}
                     placeholder="Ask anything... e.g. 'something spicy with chicken'"
-                    className="flex-1 px-3.5 py-2.5 bg-[#0a0a0f] border border-[#2a2a3a] rounded-xl text-sm text-[#f0f0f5]
-                               focus:outline-none focus:ring-1 focus:ring-orange-500/50 focus:border-orange-500/50
-                               placeholder:text-[#3a3a4a]"
+                    className="flex-1 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900
+                               focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400
+                               placeholder:text-gray-400 transition-all"
                     disabled={aiLoading}
                   />
                   <button
                     onClick={() => aiQuery.trim() && handleAiSuggest(aiQuery.trim())}
                     disabled={aiLoading || !aiQuery.trim()}
-                    className="px-4 py-2.5 gradient-accent text-white font-medium rounded-xl text-sm
+                    className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium rounded-xl text-sm
                                active:opacity-80 transition-opacity disabled:opacity-30 shrink-0"
                   >
                     {aiLoading ? (
@@ -419,14 +419,14 @@ export default function HomeTab() {
 
             {/* AI Loading */}
             {aiLoading && (
-              <div className="bg-[#16161e] border border-[#2a2a3a] rounded-2xl p-5 space-y-3">
+              <div className="bg-white border border-gray-100 rounded-2xl p-5 space-y-3 shadow-sm">
                 <div className="flex items-center gap-2">
-                  <span className="w-4 h-4 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
-                  <span className="text-sm text-[#55556a]">Thinking of something tasty...</span>
+                  <span className="w-4 h-4 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+                  <span className="text-sm text-gray-400">Thinking of something tasty...</span>
                 </div>
                 <div className="space-y-2">
                   {[...Array(3)].map((_, i) => (
-                    <div key={i} className="h-3.5 shimmer rounded w-full" />
+                    <div key={i} className="h-3.5 bg-gray-100 animate-pulse rounded w-full" />
                   ))}
                 </div>
               </div>
@@ -434,7 +434,7 @@ export default function HomeTab() {
 
             {/* AI Error */}
             {aiError && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400 text-sm">
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-600 text-sm">
                 {aiError}
               </div>
             )}
@@ -443,12 +443,12 @@ export default function HomeTab() {
             {suggestions.length > 0 && !aiLoading && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-[10px] font-semibold uppercase tracking-wider text-[#55556a]">
-                    AI Suggestions
+                  <h3 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                    Suggestions
                   </h3>
                   <button
                     onClick={() => setSuggestions([])}
-                    className="text-[10px] text-[#3a3a4a] active:text-[#55556a]"
+                    className="text-[10px] text-gray-300 active:text-gray-500"
                   >
                     Clear
                   </button>
@@ -459,43 +459,43 @@ export default function HomeTab() {
                     <button
                       key={i}
                       onClick={() => setSelectedSuggestion(s)}
-                      className="w-full bg-[#16161e] border border-[#2a2a3a] rounded-xl p-4
-                                 active:bg-[#1e1e2a] transition-colors text-left"
+                      className="w-full bg-white border border-gray-100 rounded-xl p-4 shadow-sm
+                                 active:bg-gray-50 transition-colors text-left"
                     >
                       <div className="flex items-start gap-3">
                         <span className="text-2xl mt-0.5">{badge.emoji}</span>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <p className="text-sm font-medium text-[#f0f0f5]">{s.dish}</p>
+                            <p className="text-sm font-medium text-gray-900">{s.dish}</p>
                             <span className={`text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded-full border ${badge.color}`}>
                               {badge.label}
                             </span>
                           </div>
-                          <p className="text-xs text-[#55556a] mt-1">{s.why}</p>
+                          <p className="text-xs text-gray-400 mt-1">{s.why}</p>
                           <div className="flex items-center gap-2 mt-2 flex-wrap">
-                            <span className="text-[10px] text-[#3a3a4a]">
+                            <span className="text-[10px] text-gray-400">
                               {s.ingredients.length} ingredients
                             </span>
-                            <span className="text-[10px] text-[#2a2a3a]">|</span>
-                            <span className="text-[10px] text-[#3a3a4a]">
+                            <span className="text-[10px] text-gray-300">|</span>
+                            <span className="text-[10px] text-gray-400">
                               {s.steps.length} steps
                             </span>
                             {s.missing_ingredients && s.missing_ingredients.length > 0 && (
                               <>
-                                <span className="text-[10px] text-[#2a2a3a]">|</span>
-                                <span className="text-[10px] text-amber-500/70">
+                                <span className="text-[10px] text-gray-300">|</span>
+                                <span className="text-[10px] text-amber-500">
                                   Need {s.missing_ingredients.length} more
                                 </span>
                               </>
                             )}
                           </div>
                           {s.missing_ingredients && s.missing_ingredients.length > 0 && (
-                            <p className="text-[10px] text-[#3a3a4a] mt-1.5 truncate">
+                            <p className="text-[10px] text-gray-400 mt-1.5 truncate">
                               Buy: {s.missing_ingredients.join(", ")}
                             </p>
                           )}
                         </div>
-                        <svg className="w-4 h-4 text-[#3a3a4a] shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-300 shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                       </div>
@@ -506,20 +506,20 @@ export default function HomeTab() {
             )}
 
             {/* Leftover Mode */}
-            <div className="bg-[#16161e] border border-[#2a2a3a] rounded-2xl overflow-hidden">
+            <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
               <button
                 onClick={() => setShowLeftover(!showLeftover)}
-                className="w-full px-5 py-4 flex items-center justify-between active:bg-[#1e1e2a] transition-colors"
+                className="w-full px-5 py-4 flex items-center justify-between active:bg-gray-50 transition-colors"
               >
                 <div className="flex items-center gap-2.5">
                   <span className="text-xl">🧊</span>
                   <div className="text-left">
-                    <h3 className="text-sm font-semibold text-[#f0f0f5]">Leftover Mode</h3>
-                    <p className="text-[10px] text-[#55556a]">What can I cook with what I have?</p>
+                    <h3 className="text-sm font-semibold text-gray-900">Leftover Mode</h3>
+                    <p className="text-[10px] text-gray-400">What can I cook with what I have?</p>
                   </div>
                 </div>
                 <svg
-                  className={`w-4 h-4 text-[#55556a] transition-transform ${showLeftover ? "rotate-180" : ""}`}
+                  className={`w-4 h-4 text-gray-400 transition-transform ${showLeftover ? "rotate-180" : ""}`}
                   fill="none" stroke="currentColor" viewBox="0 0 24 24"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -535,15 +535,15 @@ export default function HomeTab() {
                       onChange={(e) => setFridgeInput(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && handleLeftoverSearch()}
                       placeholder="chicken, rice, onion, garlic..."
-                      className="flex-1 px-3.5 py-2.5 bg-[#0a0a0f] border border-[#2a2a3a] rounded-xl text-sm text-[#f0f0f5]
-                                 focus:outline-none focus:ring-1 focus:ring-orange-500/50
-                                 placeholder:text-[#3a3a4a]"
+                      className="flex-1 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900
+                                 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400
+                                 placeholder:text-gray-400 transition-all"
                       disabled={leftoverLoading}
                     />
                     <button
                       onClick={handleLeftoverSearch}
                       disabled={leftoverLoading || !fridgeInput.trim()}
-                      className="px-4 py-2.5 gradient-accent text-white font-medium rounded-xl text-sm
+                      className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium rounded-xl text-sm
                                  active:opacity-80 disabled:opacity-30 shrink-0"
                     >
                       {leftoverLoading ? (
@@ -561,25 +561,25 @@ export default function HomeTab() {
                         <button
                           key={m.id}
                           onClick={() => setSelectedLeftover(m)}
-                          className="w-full bg-[#0a0a0f] rounded-xl p-3 text-left active:bg-[#16161e] transition-colors"
+                          className="w-full bg-gray-50 rounded-xl p-3 text-left active:bg-gray-100 transition-colors"
                         >
                           <div className="flex items-center justify-between gap-2">
-                            <p className="text-sm font-medium text-[#f0f0f5] truncate flex-1">{m.dish}</p>
+                            <p className="text-sm font-medium text-gray-900 truncate flex-1">{m.dish}</p>
                             <span className={`text-xs font-bold shrink-0 ${
-                              m.percent >= 80 ? "text-green-400" :
-                              m.percent >= 50 ? "text-amber-400" : "text-red-400"
+                              m.percent >= 80 ? "text-green-500" :
+                              m.percent >= 50 ? "text-amber-500" : "text-red-500"
                             }`}>
                               {m.percent}%
                             </span>
                           </div>
                           <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                            <span className="text-[10px] text-green-400/70">
+                            <span className="text-[10px] text-green-500">
                               Have {m.have.length}
                             </span>
                             {m.need.length > 0 && (
                               <>
-                                <span className="text-[10px] text-[#2a2a3a]">|</span>
-                                <span className="text-[10px] text-amber-400/70">
+                                <span className="text-[10px] text-gray-300">|</span>
+                                <span className="text-[10px] text-amber-500">
                                   Need {m.need.length}: {m.need.slice(0, 2).join(", ")}{m.need.length > 2 ? "..." : ""}
                                 </span>
                               </>
@@ -591,26 +591,26 @@ export default function HomeTab() {
                   )}
 
                   {leftoverMatches.length === 0 && !leftoverLoading && fridgeInput.trim() && (
-                    <p className="text-xs text-[#3a3a4a] text-center py-2">No matching recipes found. Save more recipes first!</p>
+                    <p className="text-xs text-gray-400 text-center py-2">No matching recipes found. Save more recipes first!</p>
                   )}
                 </div>
               )}
             </div>
 
             {/* Banner */}
-            <div className="relative overflow-hidden rounded-2xl h-40 gradient-accent">
+            <div className="relative overflow-hidden rounded-2xl h-40 bg-gradient-to-r from-blue-600 to-blue-500">
               <div className="absolute inset-0 flex items-center px-6">
                 <div>
                   <p className="text-white/70 text-xs font-medium uppercase tracking-wider">Featured</p>
                   <h3 className="text-white text-xl font-bold mt-1">Discover recipes from<br />your favorite creators</h3>
                 </div>
               </div>
-              <div className="absolute right-4 bottom-4 text-6xl opacity-30">🍽️</div>
+              <div className="absolute right-4 bottom-4 text-6xl opacity-20">🍽️</div>
             </div>
 
             {/* Trending */}
             <div>
-              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-[#55556a] mb-3">
+              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-3">
                 Trending categories
               </h3>
               <div className="grid grid-cols-2 gap-3">
@@ -618,13 +618,13 @@ export default function HomeTab() {
                   <button
                     key={item.title}
                     onClick={() => setSelectedDummy(item)}
-                    className="bg-[#16161e] border border-[#2a2a3a] rounded-xl p-4 flex items-center gap-3
-                               active:bg-[#1e1e2a] transition-colors text-left"
+                    className="bg-white border border-gray-100 rounded-xl p-4 flex items-center gap-3 shadow-sm
+                               active:bg-gray-50 transition-colors text-left"
                   >
                     <span className="text-2xl">{item.emoji}</span>
                     <div>
-                      <p className="text-sm font-medium text-[#c0c0d0]">{item.title}</p>
-                      <p className="text-[10px] text-[#55556a]">{item.tag}</p>
+                      <p className="text-sm font-medium text-gray-800">{item.title}</p>
+                      <p className="text-[10px] text-gray-400">{item.tag}</p>
                     </div>
                   </button>
                 ))}
@@ -632,8 +632,8 @@ export default function HomeTab() {
             </div>
 
             {/* Quick tips */}
-            <div className="bg-[#16161e] border border-[#2a2a3a] rounded-xl p-4">
-              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-[#55556a] mb-2">
+            <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
+              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">
                 How it works
               </h3>
               <div className="space-y-2.5">
@@ -643,10 +643,10 @@ export default function HomeTab() {
                   { n: "3", t: "Get ingredients, steps, and a shopping list" },
                 ].map((s) => (
                   <div key={s.n} className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-full bg-orange-500/15 text-orange-500 text-xs font-bold flex items-center justify-center shrink-0">
+                    <span className="w-6 h-6 rounded-full bg-blue-50 text-blue-500 text-xs font-bold flex items-center justify-center shrink-0">
                       {s.n}
                     </span>
-                    <p className="text-sm text-[#8888a0]">{s.t}</p>
+                    <p className="text-sm text-gray-500">{s.t}</p>
                   </div>
                 ))}
               </div>

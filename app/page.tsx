@@ -75,9 +75,9 @@ function AppShell() {
   if (!user) return <AuthScreen />;
 
   return (
-    <div className="h-dvh bg-[#06060a] flex justify-center">
-      <div className="flex flex-col h-full w-full max-w-[480px] bg-[#0a0a0f] relative
-                      lg:border-x lg:border-[#2a2a3a] lg:shadow-2xl safe-top">
+    <div className="h-dvh bg-gray-50 flex justify-center">
+      <div className="flex flex-col h-full w-full max-w-[480px] bg-white relative
+                      lg:border-x lg:border-gray-200 lg:shadow-xl safe-top">
         {activeTab === "home" && <HomeTab />}
         {activeTab === "recipes" && <RecipesTab />}
         {activeTab === "plan" && <PlanTab />}
