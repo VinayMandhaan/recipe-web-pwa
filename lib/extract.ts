@@ -25,7 +25,7 @@ export interface CascadeResponse {
   caption: string;
   caption_ok: boolean;
   reason: string | null;
-  stage: "caption" | "blog" | "transcript" | "fallback";
+  stage: "caption" | "comments" | "blog" | "transcript" | "fallback";
   result: RecipeResult | null;
   message?: string;
   debug?: Record<string, unknown>;
@@ -185,6 +185,54 @@ async function getInstagram(
     caption: "",
     reason: "WALLED (datacenter-IP block)",
   };
+}
+
+function extractVideoId(url: string): string | null {
+  const patterns = [
+    /youtube\.com\/shorts\/([^?&#]+)/,
+    /youtube\.com\/watch\?v=([^&#]+)/,
+    /youtu\.be\/([^?&#]+)/,
+    /youtube\.com\/embed\/([^?&#]+)/,
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+async function getYouTubeComments(
+  url: string
+): Promise<{ ok: boolean; comments: string; reason: string | null }> {
+  const apiKey = process.env.YOUTUBE_API_KEY;
+  if (!apiKey) return { ok: false, comments: "", reason: "no YOUTUBE_API_KEY" };
+
+  const videoId = extractVideoId(url);
+  if (!videoId) return { ok: false, comments: "", reason: "could not extract video ID" };
+
+  try {
+    const r = await fetch(
+      `https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=${videoId}&maxResults=15&order=relevance&textFormat=plainText&key=${apiKey}`,
+      { headers: { "User-Agent": UA } }
+    );
+    if (!r.ok) return { ok: false, comments: "", reason: `YouTube API HTTP ${r.status}` };
+
+    const d = await r.json();
+    const items = d.items || [];
+    if (!items.length) return { ok: false, comments: "", reason: "no comments found" };
+
+    const texts = items
+      .map((item: { snippet: { topLevelComment: { snippet: { textDisplay: string } } } }) =>
+        item.snippet.topLevelComment.snippet.textDisplay
+      )
+      .filter((t: string) => t.length > 30);
+
+    if (!texts.length) return { ok: false, comments: "", reason: "no substantial comments" };
+
+    return { ok: true, comments: texts.join("\n\n---\n\n"), reason: null };
+  } catch {
+    return { ok: false, comments: "", reason: "YouTube API request failed" };
+  }
 }
 
 async function getCaption(url: string) {
@@ -447,7 +495,22 @@ export async function runCascade(url: string): Promise<CascadeResponse> {
     }
   }
 
-  // step 2: blog link in caption -> JSON-LD or page text
+  // step 2: YouTube comments (creators often post recipe in comments/pinned comment)
+  if (cap.platform === "youtube") {
+    const cm = await getYouTubeComments(url);
+    res.debug!.step2_comments = cm;
+    if (cm.ok && cm.comments) {
+      const ex = await groqExtract(cm.comments);
+      res.debug!.step2_comments_extract = ex;
+      if (isGood(ex)) {
+        res.stage = "comments";
+        res.result = ex.parsed!;
+        return res;
+      }
+    }
+  }
+
+  // step 3: blog link in caption -> JSON-LD or page text
   const link = cap.caption ? firstUrl(cap.caption) : null;
   if (link) {
     const lk = await fetchLink(link);
@@ -459,16 +522,16 @@ export async function runCascade(url: string): Promise<CascadeResponse> {
     }
   }
 
-  // step 3: video transcript
+  // step 4: video transcript
   const tr = await transcribeVideo(url);
-  res.debug!.step3_transcript = tr;
+  res.debug!.step4_transcript = tr;
   if (isGood(tr)) {
     res.stage = "transcript";
     res.result = tr.parsed!;
     return res;
   }
 
-  // step 4: fallback
+  // step 5: fallback
   res.stage = "fallback";
   res.result = null;
   res.message =
