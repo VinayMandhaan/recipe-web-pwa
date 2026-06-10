@@ -1,5 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-    <rect width="512" height="512" rx="102.4" fill="#f97316"/>
-    <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" 
-          font-family="system-ui, sans-serif" font-weight="700" font-size="256" fill="white">R</text>
-  </svg>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#1D4ED8"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="108" fill="url(#bg)"/>
+  <rect x="138" y="85" width="182" height="293" rx="32" stroke="white" stroke-width="13" fill="none" stroke-opacity="0.95"/>
+  <line x1="202" y1="341" x2="277" y2="341" stroke="white" stroke-width="10" stroke-linecap="round" stroke-opacity="0.5"/>
+  <path d="M202 192 L202 266 L266 229 Z" fill="white" fill-opacity="0.95"/>
+  <g transform="translate(330, 133)">
+    <path d="M10 0 L10 48 M32 0 L32 48 M54 0 L54 48 M2 48 Q2 75 32 75 Q62 75 62 48 M32 75 L32 165"
+      stroke="white" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-opacity="0.9"/>
+  </g>
+</svg>
