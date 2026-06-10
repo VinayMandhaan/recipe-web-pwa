@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -23,7 +24,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#0a0a0f",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
@@ -38,6 +39,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col font-sans antialiased">
         {children}
+        <Analytics />
         <script
           dangerouslySetInnerHTML={{
             __html: `

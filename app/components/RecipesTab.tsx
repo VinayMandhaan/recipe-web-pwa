@@ -28,11 +28,11 @@ const TAGS = [
 ];
 
 const TAG_COLORS: Record<string, string> = {
-  breakfast: "bg-amber-500/15 text-amber-400 border-amber-500/20",
-  lunch: "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
-  dinner: "bg-indigo-500/15 text-indigo-400 border-indigo-500/20",
-  snack: "bg-pink-500/15 text-pink-400 border-pink-500/20",
-  dessert: "bg-rose-500/15 text-rose-400 border-rose-500/20",
+  breakfast: "bg-amber-50 text-amber-600 border-amber-200",
+  lunch: "bg-yellow-50 text-yellow-600 border-yellow-200",
+  dinner: "bg-indigo-50 text-indigo-600 border-indigo-200",
+  snack: "bg-pink-50 text-pink-600 border-pink-200",
+  dessert: "bg-rose-50 text-rose-600 border-rose-200",
 };
 
 export default function RecipesTab() {
@@ -99,16 +99,16 @@ export default function RecipesTab() {
         <div className="px-5 pt-6 pb-3">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-[#f0f0f5]">My Recipes</h1>
-              <p className="text-sm text-[#55556a] mt-1">
+              <h1 className="text-2xl font-bold text-gray-900">My Recipes</h1>
+              <p className="text-sm text-gray-500 mt-1">
                 {recipes.length > 0 ? `${recipes.length} saved` : "Your saved recipe collection"}
               </p>
             </div>
             {filtered.length >= 2 && (
               <button
                 onClick={() => setShowCombinedList(true)}
-                className="px-3 py-2 bg-orange-500/10 text-orange-500 rounded-xl text-xs font-medium
-                           active:bg-orange-500/20 transition-colors flex items-center gap-1.5"
+                className="px-3 py-2 bg-blue-50 text-blue-500 rounded-xl text-xs font-medium
+                           active:bg-blue-100 transition-colors flex items-center gap-1.5"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -124,7 +124,7 @@ export default function RecipesTab() {
             {/* Search */}
             <div className="px-5 pb-3">
               <div className="relative">
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#55556a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <input
@@ -132,9 +132,9 @@ export default function RecipesTab() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search by dish or ingredient..."
-                  className="w-full pl-9 pr-4 py-2.5 bg-[#16161e] border border-[#2a2a3a] rounded-xl text-sm text-[#f0f0f5]
-                             focus:outline-none focus:ring-1 focus:ring-orange-500/50 focus:border-orange-500/50
-                             placeholder:text-[#3a3a4a]"
+                  className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm text-gray-900
+                             focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50
+                             placeholder:text-gray-400"
                 />
               </div>
             </div>
@@ -146,8 +146,8 @@ export default function RecipesTab() {
                   onClick={() => setActiveTag(null)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-colors border ${
                     !activeTag
-                      ? "bg-orange-500/15 text-orange-400 border-orange-500/30"
-                      : "bg-[#16161e] text-[#55556a] border-[#2a2a3a] active:bg-[#1e1e2a]"
+                      ? "bg-blue-50 text-blue-500 border-blue-200"
+                      : "bg-white text-gray-500 border-gray-100 active:bg-gray-50"
                   }`}
                 >
                   All
@@ -161,7 +161,7 @@ export default function RecipesTab() {
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-colors border ${
                         activeTag === t.key
                           ? TAG_COLORS[t.key]
-                          : "bg-[#16161e] text-[#55556a] border-[#2a2a3a] active:bg-[#1e1e2a]"
+                          : "bg-white text-gray-500 border-gray-100 active:bg-gray-50"
                       }`}
                     >
                       {t.emoji} {t.label}{count > 0 ? ` (${count})` : ""}
@@ -176,7 +176,7 @@ export default function RecipesTab() {
         {loading ? (
           <div className="px-5 space-y-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-[#16161e] border border-[#2a2a3a] rounded-xl p-4 space-y-2">
+              <div key={i} className="bg-white shadow-sm border border-gray-100 rounded-xl p-4 space-y-2">
                 <div className="h-4 shimmer rounded w-3/4" />
                 <div className="h-3 shimmer rounded w-1/2" />
               </div>
@@ -184,20 +184,20 @@ export default function RecipesTab() {
           </div>
         ) : recipes.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center px-8 pt-20">
-            <div className="w-16 h-16 rounded-2xl bg-[#16161e] border border-[#2a2a3a] flex items-center justify-center mb-4">
-              <svg className="w-7 h-7 text-[#3a3a4a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-16 h-16 rounded-2xl bg-white shadow-sm border border-gray-100 flex items-center justify-center mb-4">
+              <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
               </svg>
             </div>
-            <p className="text-sm text-[#55556a]">No saved recipes yet</p>
-            <p className="text-xs text-[#3a3a4a] mt-1">
+            <p className="text-sm text-gray-500">No saved recipes yet</p>
+            <p className="text-xs text-gray-400 mt-1">
               Extract a recipe and tap the bookmark icon to save
             </p>
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center px-8 pt-12">
-            <p className="text-sm text-[#55556a]">No matches found</p>
-            <p className="text-xs text-[#3a3a4a] mt-1">Try a different search or filter</p>
+            <p className="text-sm text-gray-500">No matches found</p>
+            <p className="text-xs text-gray-400 mt-1">Try a different search or filter</p>
           </div>
         ) : (
           <div className="px-5 pb-6 space-y-3">
@@ -208,23 +208,23 @@ export default function RecipesTab() {
                 <button
                   key={r.id}
                   onClick={() => setSelected(r)}
-                  className="w-full bg-[#16161e] border border-[#2a2a3a] rounded-xl p-4
-                             active:bg-[#1e1e2a] transition-colors text-left"
+                  className="w-full bg-white shadow-sm border border-gray-100 rounded-xl p-4
+                             active:bg-gray-50 transition-colors text-left"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-[#f0f0f5] truncate">{r.dish}</p>
+                      <p className="text-sm font-medium text-gray-900 truncate">{r.dish}</p>
                       <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                         {tagInfo && (
                           <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded border ${TAG_COLORS[r.tag!]}`}>
                             {tagInfo.emoji} {tagInfo.label}
                           </span>
                         )}
-                        <span className="text-[10px] text-[#55556a]">
+                        <span className="text-[10px] text-gray-500">
                           {r.ingredients.length} ingredients
                         </span>
-                        <span className="text-[10px] text-[#3a3a4a]">|</span>
-                        <span className="text-[10px] text-[#55556a]">
+                        <span className="text-[10px] text-gray-400">|</span>
+                        <span className="text-[10px] text-gray-500">
                           {r.steps.length} steps
                         </span>
                       </div>
@@ -236,12 +236,12 @@ export default function RecipesTab() {
                             </span>
                           ))}
                           {dietaryTags.length > 3 && (
-                            <span className="text-[9px] text-[#3a3a4a]">+{dietaryTags.length - 3}</span>
+                            <span className="text-[9px] text-gray-400">+{dietaryTags.length - 3}</span>
                           )}
                         </div>
                       )}
                     </div>
-                    <svg className="w-4 h-4 text-[#3a3a4a] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </div>

@@ -1,5 +1,5 @@
-const CACHE_NAME = "reelrecipe-v1";
-const PRECACHE = ["/", "/manifest.json"];
+const CACHE_NAME = "reelrecipe-v2";
+const PRECACHE = ["/manifest.json"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(
@@ -18,8 +18,13 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
-  // network-first for API calls, cache-first for static assets
   if (e.request.url.includes("/api/")) return;
+  if (e.request.mode === "navigate") {
+    e.respondWith(
+      fetch(e.request).catch(() => caches.match(e.request))
+    );
+    return;
+  }
   e.respondWith(
     caches.match(e.request).then((cached) => cached || fetch(e.request))
   );

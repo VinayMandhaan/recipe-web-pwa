@@ -207,21 +207,21 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#06060a] flex justify-center">
-    <div className="flex flex-col w-full max-w-[480px] bg-[#0a0a0f] safe-top safe-bottom
-                    lg:border-x lg:border-[#2a2a3a]">
+    <div className="fixed inset-0 z-50 bg-white flex justify-center">
+    <div className="flex flex-col w-full max-w-[480px] bg-white safe-top safe-bottom
+                    lg:border-x lg:border-gray-200">
       {/* Header */}
-      <div className="flex items-center gap-3 px-5 py-4 border-b border-[#2a2a3a]">
-        <button onClick={onClose} className="p-1 -ml-1 text-[#8888a0] active:text-[#f0f0f5]">
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-200">
+        <button onClick={onClose} className="p-1 -ml-1 text-gray-500 active:text-gray-900">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 className="text-lg font-semibold text-[#f0f0f5]">Snap Meal</h1>
+        <h1 className="text-lg font-semibold text-gray-900">Snap Meal</h1>
         {step !== "capture" && (
           <button
             onClick={resetAll}
-            className="ml-auto text-xs text-orange-500 active:text-orange-400 font-medium"
+            className="ml-auto text-xs text-blue-500 active:text-blue-500 font-medium"
           >
             New photo
           </button>
@@ -242,11 +242,11 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
           {step === "capture" && !identifying && (
             <div className="space-y-5">
               <div className="text-center pt-8 pb-4">
-                <div className="w-20 h-20 rounded-2xl bg-orange-500/10 flex items-center justify-center mx-auto mb-4">
+                <div className="w-20 h-20 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-4">
                   <span className="text-4xl">📸</span>
                 </div>
-                <h2 className="text-xl font-bold text-[#f0f0f5]">Snap your meal</h2>
-                <p className="text-sm text-[#55556a] mt-2 max-w-[260px] mx-auto">
+                <h2 className="text-xl font-bold text-gray-900">Snap your meal</h2>
+                <p className="text-sm text-gray-500 mt-2 max-w-[260px] mx-auto">
                   Take a photo or upload one and get instant nutrition analysis
                 </p>
               </div>
@@ -268,16 +268,16 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
                       fileRef.current.click();
                     }
                   }}
-                  className="py-8 bg-[#16161e] border border-[#2a2a3a] rounded-2xl
-                             active:bg-[#1e1e2a] transition-colors flex flex-col items-center gap-3"
+                  className="py-8 bg-white border border-gray-200 rounded-2xl shadow-sm
+                             active:bg-gray-50 transition-colors flex flex-col items-center gap-3"
                 >
-                  <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                       d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                       d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span className="text-sm font-medium text-[#c0c0d0]">Take photo</span>
+                  <span className="text-sm font-medium text-gray-700">Take photo</span>
                 </button>
 
                 <button
@@ -287,14 +287,14 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
                       fileRef.current.click();
                     }
                   }}
-                  className="py-8 bg-[#16161e] border border-[#2a2a3a] rounded-2xl
-                             active:bg-[#1e1e2a] transition-colors flex flex-col items-center gap-3"
+                  className="py-8 bg-white border border-gray-200 rounded-2xl shadow-sm
+                             active:bg-gray-50 transition-colors flex flex-col items-center gap-3"
                 >
-                  <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                       d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <span className="text-sm font-medium text-[#c0c0d0]">Upload</span>
+                  <span className="text-sm font-medium text-gray-700">Upload</span>
                 </button>
               </div>
             </div>
@@ -307,13 +307,13 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
                 <img
                   src={imagePreview}
                   alt="Meal"
-                  className="w-full aspect-[4/3] object-cover rounded-2xl border border-[#2a2a3a]"
+                  className="w-full aspect-[4/3] object-cover rounded-2xl border border-gray-200"
                 />
               )}
-              <div className="bg-[#16161e] border border-[#2a2a3a] rounded-2xl p-5">
+              <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
-                  <span className="text-sm text-[#55556a]">Analyzing your meal...</span>
+                  <span className="w-5 h-5 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+                  <span className="text-sm text-gray-500">Analyzing your meal...</span>
                 </div>
                 <div className="space-y-2 mt-4">
                   {[...Array(4)].map((_, i) => (
@@ -331,18 +331,18 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
                 <img
                   src={imagePreview}
                   alt="Meal"
-                  className="w-full aspect-[4/3] object-cover rounded-2xl border border-[#2a2a3a]"
+                  className="w-full aspect-[4/3] object-cover rounded-2xl border border-gray-200"
                 />
               )}
 
               {/* Dish name */}
-              <div className="bg-[#16161e] border border-[#2a2a3a] rounded-2xl p-4">
+              <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-[#55556a]">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
                       Identified as
                     </p>
-                    <p className="text-lg font-bold text-[#f0f0f5] mt-1">
+                    <p className="text-lg font-bold text-gray-900 mt-1">
                       {identified?.dish || "Unknown dish"}
                     </p>
                   </div>
@@ -361,25 +361,25 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
               </div>
 
               {/* Editable ingredients */}
-              <div className="bg-[#16161e] border border-[#2a2a3a] rounded-2xl p-5">
+              <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-[10px] font-semibold uppercase tracking-wider text-[#55556a]">
+                  <h3 className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
                     Ingredients ({editIngredients.length})
                   </h3>
-                  <p className="text-[10px] text-[#3a3a4a]">Tap X to remove, add below</p>
+                  <p className="text-[10px] text-gray-400">Tap X to remove, add below</p>
                 </div>
 
                 <div className="space-y-2">
                   {editIngredients.map((ing, i) => (
                     <div
                       key={i}
-                      className="flex items-center gap-2.5 bg-[#0a0a0f] rounded-xl px-3 py-2.5"
+                      className="flex items-center gap-2.5 bg-gray-50 rounded-xl px-3 py-2.5"
                     >
-                      <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
-                      <span className="flex-1 text-sm text-[#c0c0d0]">{ing}</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                      <span className="flex-1 text-sm text-gray-700">{ing}</span>
                       <button
                         onClick={() => removeIngredient(i)}
-                        className="p-0.5 text-[#3a3a4a] active:text-red-400 transition-colors shrink-0"
+                        className="p-0.5 text-gray-400 active:text-red-400 transition-colors shrink-0"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -397,9 +397,9 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
                     onChange={(e) => setNewIngredient(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && addIngredient()}
                     placeholder="Add ingredient..."
-                    className="flex-1 px-3 py-2.5 bg-[#0a0a0f] border border-[#2a2a3a] rounded-xl text-sm text-[#f0f0f5]
-                               focus:outline-none focus:ring-1 focus:ring-orange-500/50
-                               placeholder:text-[#3a3a4a]"
+                    className="flex-1 px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900
+                               focus:outline-none focus:ring-1 focus:ring-blue-500/50
+                               placeholder:text-gray-400"
                   />
                   <button
                     onClick={addIngredient}
@@ -421,28 +421,28 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
                 <img
                   src={imagePreview}
                   alt="Meal"
-                  className="w-full aspect-[4/3] object-cover rounded-2xl border border-[#2a2a3a]"
+                  className="w-full aspect-[4/3] object-cover rounded-2xl border border-gray-200"
                 />
               )}
 
               {/* Dish + Rating */}
-              <div className="bg-[#16161e] border border-[#2a2a3a] rounded-2xl p-4">
-                <p className="text-lg font-bold text-[#f0f0f5]">{identified?.dish}</p>
+              <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
+                <p className="text-lg font-bold text-gray-900">{identified?.dish}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <span className="text-sm">
                     {RATING_STYLES[nutrition.rating]?.emoji || "🟡"}
                   </span>
-                  <span className={`text-sm font-semibold capitalize ${RATING_STYLES[nutrition.rating]?.color || "text-[#55556a]"}`}>
+                  <span className={`text-sm font-semibold capitalize ${RATING_STYLES[nutrition.rating]?.color || "text-gray-500"}`}>
                     {nutrition.rating}
                   </span>
-                  <span className="text-xs text-[#55556a]">{nutrition.rating_reason}</span>
+                  <span className="text-xs text-gray-500">{nutrition.rating_reason}</span>
                 </div>
               </div>
 
               {/* Calories */}
-              <div className="bg-[#16161e] border border-[#2a2a3a] rounded-2xl p-5 text-center">
-                <p className="text-4xl font-bold text-[#f0f0f5]">{Math.round(nutrition.calories)}</p>
-                <p className="text-xs text-[#55556a] mt-1">
+              <div className="bg-white border border-gray-200 rounded-2xl p-5 text-center shadow-sm">
+                <p className="text-4xl font-bold text-gray-900">{Math.round(nutrition.calories)}</p>
+                <p className="text-xs text-gray-500 mt-1">
                   calories per {nutrition.serving_size || "serving"}
                 </p>
               </div>
@@ -455,35 +455,35 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
                   { key: "fat", label: "Fat", val: nutrition.fat_g, unit: "g" },
                   { key: "fiber", label: "Fiber", val: nutrition.fiber_g, unit: "g" },
                 ].map((m) => (
-                  <div key={m.key} className="bg-[#16161e] border border-[#2a2a3a] rounded-xl p-3 text-center">
+                  <div key={m.key} className="bg-white border border-gray-200 rounded-xl p-3 text-center shadow-sm">
                     <div className={`w-2 h-2 rounded-full ${MACRO_COLORS[m.key]} mx-auto mb-2`} />
-                    <p className="text-base font-semibold text-[#f0f0f5]">
+                    <p className="text-base font-semibold text-gray-900">
                       {Math.round(m.val * 10) / 10}{m.unit}
                     </p>
-                    <p className="text-[9px] text-[#55556a] mt-0.5">{m.label}</p>
+                    <p className="text-[9px] text-gray-500 mt-0.5">{m.label}</p>
                   </div>
                 ))}
               </div>
 
               {/* Editable ingredients */}
-              <div className="bg-[#16161e] border border-[#2a2a3a] rounded-2xl p-5">
+              <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-[10px] font-semibold uppercase tracking-wider text-[#55556a]">
+                  <h3 className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
                     Ingredients ({editIngredients.length})
                   </h3>
-                  <p className="text-[10px] text-[#3a3a4a]">Tap X to remove</p>
+                  <p className="text-[10px] text-gray-400">Tap X to remove</p>
                 </div>
                 <div className="space-y-2">
                   {editIngredients.map((ing, i) => (
                     <div
                       key={i}
-                      className="flex items-center gap-2.5 bg-[#0a0a0f] rounded-xl px-3 py-2.5"
+                      className="flex items-center gap-2.5 bg-gray-50 rounded-xl px-3 py-2.5"
                     >
-                      <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
-                      <span className="flex-1 text-sm text-[#c0c0d0]">{ing}</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                      <span className="flex-1 text-sm text-gray-700">{ing}</span>
                       <button
                         onClick={() => { removeIngredient(i); setSaved(false); }}
-                        className="p-0.5 text-[#3a3a4a] active:text-red-400 transition-colors shrink-0"
+                        className="p-0.5 text-gray-400 active:text-red-400 transition-colors shrink-0"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -500,9 +500,9 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
                     onChange={(e) => setNewIngredient(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && addIngredient()}
                     placeholder="Add ingredient..."
-                    className="flex-1 px-3 py-2.5 bg-[#0a0a0f] border border-[#2a2a3a] rounded-xl text-sm text-[#f0f0f5]
-                               focus:outline-none focus:ring-1 focus:ring-orange-500/50
-                               placeholder:text-[#3a3a4a]"
+                    className="flex-1 px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900
+                               focus:outline-none focus:ring-1 focus:ring-blue-500/50
+                               placeholder:text-gray-400"
                   />
                   <button
                     onClick={() => { addIngredient(); setSaved(false); }}
@@ -517,12 +517,12 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
                 <button
                   onClick={() => { setSaved(false); confirmAndAnalyze(); }}
                   disabled={analyzingNutrition || editIngredients.length === 0}
-                  className="w-full mt-3 py-2.5 bg-orange-500/10 text-orange-500 font-medium rounded-xl text-xs
-                             active:bg-orange-500/20 transition-colors disabled:opacity-30
+                  className="w-full mt-3 py-2.5 bg-blue-50 text-blue-500 font-medium rounded-xl text-xs
+                             active:bg-blue-100 transition-colors disabled:opacity-30
                              flex items-center justify-center gap-1.5"
                 >
                   {analyzingNutrition ? (
-                    <span className="w-3.5 h-3.5 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+                    <span className="w-3.5 h-3.5 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
                   ) : (
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -534,18 +534,18 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
 
               {/* Improvement tips */}
               {nutrition.improvements && nutrition.improvements.length > 0 && (
-                <div className="bg-[#16161e] border border-[#2a2a3a] rounded-2xl p-5">
-                  <h3 className="text-[10px] font-semibold uppercase tracking-wider text-[#55556a] mb-3">
+                <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+                  <h3 className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-3">
                     💡 How to improve this meal
                   </h3>
                   <div className="space-y-3">
                     {nutrition.improvements.map((imp, i) => (
                       <div key={i} className="flex gap-3">
-                        <span className="text-orange-500 font-bold shrink-0 w-5 text-right text-sm">
+                        <span className="text-blue-500 font-bold shrink-0 w-5 text-right text-sm">
                           {i + 1}
                         </span>
                         <div className="flex-1">
-                          <p className="text-sm text-[#c0c0d0]">{imp.tip}</p>
+                          <p className="text-sm text-gray-700">{imp.tip}</p>
                           <p className="text-[10px] text-green-400/70 mt-0.5">{imp.impact}</p>
                         </div>
                       </div>
@@ -560,7 +560,7 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
 
       {/* Bottom action */}
       {step === "review" && !identifying && (
-        <div className="px-5 py-4 border-t border-[#2a2a3a]">
+        <div className="px-5 py-4 border-t border-gray-200">
           <button
             onClick={confirmAndAnalyze}
             disabled={editIngredients.length === 0 || analyzingNutrition}
@@ -586,7 +586,7 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
       )}
 
       {step === "results" && (
-        <div className="px-5 py-4 border-t border-[#2a2a3a] space-y-2">
+        <div className="px-5 py-4 border-t border-gray-200 space-y-2">
           {/* Save button */}
           <button
             onClick={handleSave}
@@ -618,8 +618,8 @@ export default function SnapMeal({ onClose }: { onClose: () => void }) {
           {/* Secondary action */}
           <button
             onClick={resetAll}
-            className="w-full py-3 bg-white/5 text-[#8888a0] font-medium rounded-xl text-sm
-                       active:bg-white/10 transition-colors"
+            className="w-full py-3 bg-gray-50 text-gray-500 font-medium rounded-xl text-sm
+                       active:bg-gray-100 transition-colors"
           >
             Snap another
           </button>

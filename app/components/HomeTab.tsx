@@ -1,28 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import RecipeCard from "./RecipeCard";
+import { useState, useEffect, useCallback } from "react";
+import RecipeCard, { ExtractResponse } from "./RecipeCard";
 import RecipeDetail from "./RecipeDetail";
 import SnapMeal from "./SnapMeal";
+import AccountTab from "./AccountTab";
 import { useAuth } from "./AuthProvider";
-
-interface ExtractResponse {
-  url: string;
-  platform: string | null;
-  caption: string;
-  caption_ok: boolean;
-  reason: string | null;
-  stage: "caption" | "comments" | "blog" | "transcript" | "fallback";
-  result: {
-    is_recipe: boolean;
-    dish: string;
-    ingredients: string[];
-    steps: string[];
-    confidence: string;
-    note?: string;
-  } | null;
-  message?: string;
-}
 
 interface Suggestion {
   dish: string;
@@ -161,6 +144,204 @@ const TRENDING: DummyRecipe[] = [
   },
 ];
 
+const CAROUSEL_SLIDES = [
+  {
+    gradient: "from-blue-600 to-blue-800",
+    label: "Extract",
+    title: "Paste a link, get\nthe full recipe",
+    scene: "extract",
+  },
+  {
+    gradient: "from-violet-600 to-violet-800",
+    label: "Scan",
+    title: "Snap your meal for\ninstant nutrition info",
+    scene: "scan",
+  },
+  {
+    gradient: "from-emerald-600 to-emerald-800",
+    label: "Plan",
+    title: "Organize your meals\nfor the whole week",
+    scene: "plan",
+  },
+  {
+    gradient: "from-rose-600 to-rose-800",
+    label: "Track",
+    title: "Hit your daily\nmacro targets",
+    scene: "track",
+  },
+];
+
+function FeatureCarousel() {
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  const next = useCallback(() => {
+    setActive((prev) => (prev + 1) % CAROUSEL_SLIDES.length);
+  }, []);
+
+  useEffect(() => {
+    if (paused) return;
+    const id = setInterval(next, 4000);
+    return () => clearInterval(id);
+  }, [paused, next]);
+
+  const slide = CAROUSEL_SLIDES[active];
+
+  return (
+    <div
+      className={`relative overflow-hidden rounded-2xl h-44 bg-gradient-to-br ${slide.gradient} transition-all duration-700 shadow-lg`}
+      onPointerDown={() => setPaused(true)}
+      onPointerUp={() => setPaused(false)}
+      onPointerLeave={() => setPaused(false)}
+    >
+      {/* Dark overlay for text readability */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent" />
+
+      {/* Text */}
+      <div className="absolute inset-0 flex items-center px-6 z-10">
+        <div key={active} className="animate-fade-in-up">
+          <p className="text-white/80 text-[10px] font-bold uppercase tracking-widest">{slide.label}</p>
+          <h3 className="text-white text-lg font-bold mt-1.5 leading-snug whitespace-pre-line drop-shadow-md">{slide.title}</h3>
+        </div>
+      </div>
+
+      {/* Animated scene */}
+      <div className="absolute right-4 top-1/2 -translate-y-1/2 w-28 h-28 z-10">
+        {slide.scene === "extract" && <ExtractMini key="e" />}
+        {slide.scene === "scan" && <ScanMini key="s" />}
+        {slide.scene === "plan" && <PlanMini key="p" />}
+        {slide.scene === "track" && <TrackMini key="t" />}
+      </div>
+
+      {/* Dots */}
+      <div className="absolute bottom-3.5 left-6 flex gap-1.5 z-10">
+        {CAROUSEL_SLIDES.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setActive(i)}
+            className={`h-1.5 rounded-full transition-all duration-300 ${
+              i === active ? "w-5 bg-white" : "w-1.5 bg-white/40"
+            }`}
+          />
+        ))}
+      </div>
+
+      {/* Decorative circles */}
+      <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full bg-white/[0.07]" />
+      <div className="absolute right-10 -bottom-6 w-20 h-20 rounded-full bg-white/[0.05]" />
+    </div>
+  );
+}
+
+function ExtractMini() {
+  return (
+    <div className="w-full h-full flex flex-col items-center justify-center gap-2 animate-fade-in-up">
+      <div className="w-20 h-9 bg-white/20 rounded-lg flex items-center px-2.5 gap-1.5 overflow-hidden backdrop-blur-sm border border-white/10">
+        <svg className="w-3.5 h-3.5 text-white/80 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
+        </svg>
+        <div className="h-1.5 bg-white/30 rounded-full flex-1 overflow-hidden">
+          <div className="h-full bg-white rounded-full" style={{ animation: "typing 2s ease-in-out infinite" }} />
+        </div>
+      </div>
+      <svg className="w-4 h-4 text-white animate-bounce" style={{ animationDuration: "1.5s" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+      </svg>
+      <div className="w-20 bg-white/20 rounded-lg p-2 space-y-1 backdrop-blur-sm border border-white/10">
+        <div className="h-1.5 bg-white/80 rounded-full w-12" />
+        <div className="h-1.5 bg-white/50 rounded-full w-9" />
+        <div className="h-1.5 bg-white/50 rounded-full w-14" />
+      </div>
+    </div>
+  );
+}
+
+function ScanMini() {
+  return (
+    <div className="w-full h-full flex items-center justify-center animate-fade-in-up">
+      <div className="relative w-20 h-24 bg-white/15 rounded-xl border border-white/20 overflow-hidden backdrop-blur-sm">
+        <div className="absolute left-1/2 -translate-x-1/2 top-[12%] w-10 h-10 rounded-full bg-white/15 flex items-center justify-center">
+          <span className="text-xl">🍛</span>
+        </div>
+        <div className="absolute left-1.5 right-1.5 h-[2px] bg-green-300 animate-scan-line rounded-full shadow-[0_0_8px_rgba(134,239,172,0.6)]" style={{ animationDuration: "2s" }} />
+        <div className="absolute bottom-2 left-2 right-2 space-y-1.5">
+          <div className="flex gap-1.5">
+            <div className="h-3 w-3 rounded bg-green-400/80 animate-pop-in" style={{ animationDelay: "0.5s" }} />
+            <div className="h-3 flex-1 bg-white/25 rounded" />
+          </div>
+          <div className="flex gap-1.5">
+            <div className="h-3 w-3 rounded bg-blue-400/80 animate-pop-in" style={{ animationDelay: "0.8s" }} />
+            <div className="h-3 flex-1 bg-white/25 rounded" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PlanMini() {
+  return (
+    <div className="w-full h-full flex items-center justify-center animate-fade-in-up">
+      <div className="bg-white/15 rounded-xl p-2.5 border border-white/20 backdrop-blur-sm">
+        <div className="grid grid-cols-4 gap-1.5">
+          {["M","T","W","T"].map((d, i) => (
+            <div key={i} className="text-[8px] text-white/80 text-center font-bold">{d}</div>
+          ))}
+          {[0,1,2,3,4,5,6,7].map((i) => (
+            <div
+              key={i}
+              className="w-5 h-5 rounded-md bg-white/15 flex items-center justify-center animate-pop-in border border-white/10"
+              style={{ animationDelay: `${i * 0.15}s` }}
+            >
+              {i < 5 && (
+                <span className="text-[10px]">{["🍳","🥗","🍗","🍝","🍰"][i]}</span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TrackMini() {
+  return (
+    <div className="w-full h-full flex items-center justify-center animate-fade-in-up">
+      <div className="flex flex-col items-center gap-2.5">
+        <div className="relative">
+          <svg width="56" height="56" className="-rotate-90">
+            <circle cx="28" cy="28" r="22" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="5" />
+            <circle
+              cx="28" cy="28" r="22" fill="none" stroke="white" strokeWidth="5"
+              strokeLinecap="round"
+              strokeDasharray={2 * Math.PI * 22}
+              strokeDashoffset={2 * Math.PI * 22 * 0.3}
+              className="animate-ring-fill"
+            />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-xs text-white font-bold drop-shadow-sm">70%</span>
+          </div>
+        </div>
+        <div className="flex gap-1.5">
+          {[
+            { color: "bg-white", w: 75 },
+            { color: "bg-white/70", w: 55 },
+            { color: "bg-white/50", w: 40 },
+          ].map((bar, i) => (
+            <div key={i} className="w-9 h-2 bg-white/15 rounded-full overflow-hidden">
+              <div
+                className={`h-full ${bar.color} rounded-full animate-fill-bar`}
+                style={{ width: `${bar.w}%`, animationDelay: `${i * 0.2}s` }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function HomeTab() {
   const { user } = useAuth();
   const [url, setUrl] = useState("");
@@ -174,7 +355,9 @@ export default function HomeTab() {
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
   const [showSnapMeal, setShowSnapMeal] = useState(false);
+  const [showAccount, setShowAccount] = useState(false);
   const [showLeftover, setShowLeftover] = useState(false);
+  const [showSmartChef, setShowSmartChef] = useState(false);
   const [fridgeInput, setFridgeInput] = useState("");
   const [leftoverLoading, setLeftoverLoading] = useState(false);
   const [leftoverMatches, setLeftoverMatches] = useState<{
@@ -269,63 +452,77 @@ export default function HomeTab() {
 
   return (
     <div className="flex-1 overflow-y-auto no-scrollbar bg-gray-50">
-      {/* Hero */}
-      <div className="px-5 pt-6 pb-4">
-        <h1 className="text-2xl font-bold text-gray-900">
-          What are we cooking<br />today?
-        </h1>
-        <p className="text-sm text-gray-400 mt-1">
-          Paste a reel or video link to extract the recipe
-        </p>
+      {/* Header */}
+      <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+        <div>
+          <p className="text-sm text-gray-400">Hello, <span className="font-medium text-gray-600">{user?.name?.split(" ")[0] || "Chef"}</span></p>
+          <h1 className="text-xl font-bold text-gray-900">What are we cooking today?</h1>
+        </div>
+        <button
+          onClick={() => setShowAccount(true)}
+          className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center
+                     shadow-sm active:bg-gray-50 transition-colors shrink-0"
+        >
+          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
       </div>
 
-      {/* URL Input */}
-      <div className="px-5 pb-5">
-        <div className="flex gap-2">
-          <div className="flex-1 relative">
-            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {/* Extract Card */}
+      <div className="px-5 pb-4">
+        <div className="bg-blue-500 border border-blue-600 rounded-2xl p-5 shadow-md shadow-blue-500/20">
+          <div className="flex items-center gap-2 mb-3">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
             </svg>
+            <h2 className="text-white font-bold text-base">Extract Recipe</h2>
+          </div>
+          <p className="text-blue-100 text-xs mb-4">Paste a reel or video link and we pull out the full recipe</p>
+
+          <div className="flex gap-2">
             <input
               type="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !loading && handleExtract()}
-              placeholder="Paste TikTok, Instagram, or YouTube link..."
-              className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900
-                         focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400
-                         placeholder:text-gray-400 transition-all"
+              placeholder="Paste link here..."
+              className="flex-1 px-4 py-3 bg-white/20 border border-white/25 rounded-xl text-sm text-white
+                         focus:outline-none focus:ring-2 focus:ring-white/30 focus:bg-white/25
+                         placeholder:text-white/50 transition-all"
               disabled={loading}
             />
+            <button
+              onClick={handleExtract}
+              disabled={loading || !url.trim()}
+              className="px-5 py-3 bg-white text-blue-600 font-bold rounded-xl text-sm
+                         active:bg-blue-50 transition-colors shadow-sm
+                         disabled:opacity-40 disabled:cursor-not-allowed
+                         flex items-center gap-2 shrink-0"
+            >
+              {loading ? (
+                <span className="w-5 h-5 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+              ) : (
+                "Extract"
+              )}
+            </button>
           </div>
-          <button
-            onClick={handleExtract}
-            disabled={loading || !url.trim()}
-            className="px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-xl text-sm
-                       active:opacity-80 transition-opacity shadow-md shadow-blue-500/20
-                       disabled:opacity-30 disabled:cursor-not-allowed
-                       flex items-center gap-2 shrink-0"
-          >
-            {loading ? (
-              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            ) : (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            )}
-          </button>
-          <button
-            onClick={() => setShowSnapMeal(true)}
-            className="px-3.5 py-3 bg-gray-50 border border-gray-200 rounded-xl
-                       active:bg-blue-50 active:border-blue-200 transition-colors shrink-0"
-          >
-            <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </button>
+
+          {/* Platform icons */}
+          <div className="flex items-center gap-3 mt-3">
+            <span className="text-[10px] text-blue-200">Works with</span>
+            <div className="flex items-center gap-2">
+              {[
+                { name: "TikTok", icon: "M9 12a4 4 0 108 0 4 4 0 00-8 0zM12 2v10" },
+                { name: "Instagram", icon: "M7.75 2h8.5A5.75 5.75 0 0122 7.75v8.5A5.75 5.75 0 0116.25 22h-8.5A5.75 5.75 0 012 16.25v-8.5A5.75 5.75 0 017.75 2zM16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zM17.5 6.5h.01" },
+                { name: "YouTube", icon: "M22.54 6.42a2.78 2.78 0 00-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 00-1.94 2A29 29 0 001 11.75a29 29 0 00.46 5.33A2.78 2.78 0 003.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 001.94-2 29 29 0 00.46-5.25 29 29 0 00-.46-5.33zM9.75 15.02V8.48l5.75 3.27-5.75 3.27z" },
+              ].map((p) => (
+                <span key={p.name} className="text-[10px] text-white/80 bg-white/15 px-2 py-0.5 rounded-full font-medium">
+                  {p.name}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -357,64 +554,84 @@ export default function HomeTab() {
         {/* Trending section (show when no result) */}
         {!data && !loading && !error && (
           <>
-            {/* Smart Chef */}
+            {/* More tools header */}
+            <h3 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+              More tools
+            </h3>
+
+            {/* Smart Chef - compact row */}
             <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
-              <div className="px-5 pt-4 pb-3 flex items-center gap-2.5">
-                <span className="text-xl">👨‍🍳</span>
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-900">Smart Chef</h3>
-                  <p className="text-[10px] text-gray-400">Get personalized recipe suggestions</p>
+              <button
+                onClick={() => setShowSmartChef(!showSmartChef)}
+                className="w-full px-5 py-3.5 flex items-center justify-between active:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">👨‍🍳</span>
+                  <div className="text-left">
+                    <h3 className="text-sm font-medium text-gray-700">Smart Chef</h3>
+                    <p className="text-[10px] text-gray-400">Get personalized recipe suggestions</p>
+                  </div>
                 </div>
-              </div>
+                <svg
+                  className={`w-4 h-4 text-gray-400 transition-transform ${showSmartChef ? "rotate-180" : ""}`}
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
 
-              {/* Suggestion chips */}
-              <div className="px-5 pb-3 flex gap-2 overflow-x-auto no-scrollbar">
-                {SUGGESTION_CHIPS.map((chip) => (
-                  <button
-                    key={chip.label}
-                    onClick={() => handleAiSuggest(chip.query)}
-                    disabled={aiLoading}
-                    className="shrink-0 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl
-                               active:bg-blue-50 active:border-blue-200 transition-colors
-                               disabled:opacity-40 flex items-center gap-1.5"
-                  >
-                    <span className="text-sm">{chip.emoji}</span>
-                    <span className="text-xs text-gray-500 whitespace-nowrap">{chip.label}</span>
-                  </button>
-                ))}
-              </div>
+              {showSmartChef && (
+                <>
+                  {/* Suggestion chips */}
+                  <div className="px-5 pb-3 flex gap-2 overflow-x-auto no-scrollbar">
+                    {SUGGESTION_CHIPS.map((chip) => (
+                      <button
+                        key={chip.label}
+                        onClick={() => handleAiSuggest(chip.query)}
+                        disabled={aiLoading}
+                        className="shrink-0 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl
+                                   active:bg-blue-50 active:border-blue-200 transition-colors
+                                   disabled:opacity-40 flex items-center gap-1.5"
+                      >
+                        <span className="text-sm">{chip.emoji}</span>
+                        <span className="text-xs text-gray-500 whitespace-nowrap">{chip.label}</span>
+                      </button>
+                    ))}
+                  </div>
 
-              {/* Custom query input */}
-              <div className="px-5 pb-4">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={aiQuery}
-                    onChange={(e) => setAiQuery(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && aiQuery.trim() && handleAiSuggest(aiQuery.trim())}
-                    placeholder="Ask anything... e.g. 'something spicy with chicken'"
-                    className="flex-1 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900
-                               focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400
-                               placeholder:text-gray-400 transition-all"
-                    disabled={aiLoading}
-                  />
-                  <button
-                    onClick={() => aiQuery.trim() && handleAiSuggest(aiQuery.trim())}
-                    disabled={aiLoading || !aiQuery.trim()}
-                    className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium rounded-xl text-sm
-                               active:opacity-80 transition-opacity disabled:opacity-30 shrink-0"
-                  >
-                    {aiLoading ? (
-                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
-                    ) : (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                          d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-              </div>
+                  {/* Custom query input */}
+                  <div className="px-5 pb-4">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={aiQuery}
+                        onChange={(e) => setAiQuery(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && aiQuery.trim() && handleAiSuggest(aiQuery.trim())}
+                        placeholder="Ask anything... e.g. 'something spicy with chicken'"
+                        className="flex-1 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900
+                                   focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400
+                                   placeholder:text-gray-400 transition-all"
+                        disabled={aiLoading}
+                      />
+                      <button
+                        onClick={() => aiQuery.trim() && handleAiSuggest(aiQuery.trim())}
+                        disabled={aiLoading || !aiQuery.trim()}
+                        className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium rounded-xl text-sm
+                                   active:opacity-80 transition-opacity disabled:opacity-30 shrink-0"
+                      >
+                        {aiLoading ? (
+                          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                              d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* AI Loading */}
@@ -597,16 +814,8 @@ export default function HomeTab() {
               )}
             </div>
 
-            {/* Banner */}
-            <div className="relative overflow-hidden rounded-2xl h-40 bg-gradient-to-r from-blue-600 to-blue-500">
-              <div className="absolute inset-0 flex items-center px-6">
-                <div>
-                  <p className="text-white/70 text-xs font-medium uppercase tracking-wider">Featured</p>
-                  <h3 className="text-white text-xl font-bold mt-1">Discover recipes from<br />your favorite creators</h3>
-                </div>
-              </div>
-              <div className="absolute right-4 bottom-4 text-6xl opacity-20">🍽️</div>
-            </div>
+            {/* Feature Carousel */}
+            <FeatureCarousel />
 
             {/* Trending */}
             <div>
@@ -687,6 +896,31 @@ export default function HomeTab() {
 
       {/* Snap Meal overlay */}
       {showSnapMeal && <SnapMeal onClose={() => setShowSnapMeal(false)} />}
+
+      {/* Account slide-over */}
+      {showAccount && (
+        <div className="fixed inset-0 z-50 flex justify-center">
+          <div className="w-full max-w-[480px] relative">
+            <div className="absolute inset-0 bg-black/30" onClick={() => setShowAccount(false)} />
+            <div className="absolute inset-y-0 right-0 w-[85%] max-w-[360px] bg-white shadow-2xl animate-slide-in-right flex flex-col">
+              <div className="flex items-center justify-between px-5 pt-5 pb-2">
+                <h2 className="text-lg font-bold text-gray-900">Account</h2>
+                <button
+                  onClick={() => setShowAccount(false)}
+                  className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center active:bg-gray-200"
+                >
+                  <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <AccountTab />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

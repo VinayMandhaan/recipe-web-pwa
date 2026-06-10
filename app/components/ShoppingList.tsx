@@ -112,19 +112,19 @@ export default function ShoppingList({
   const checkedCount = items.filter((i) => i.checked).length;
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#06060a] flex justify-center">
-    <div className="flex flex-col w-full max-w-[480px] bg-[#0a0a0f]
-                    lg:border-x lg:border-[#2a2a3a]">
+    <div className="fixed inset-0 z-50 bg-gray-50 flex justify-center">
+    <div className="flex flex-col w-full max-w-[480px] bg-white
+                    lg:border-x lg:border-gray-200">
       {/* Header */}
-      <div className="glass border-b border-[#2a2a3a] px-4 py-3 flex items-center justify-between safe-top">
-        <button onClick={onClose} className="text-[#8888a0] hover:text-[#f0f0f5] text-sm font-medium flex items-center gap-1">
+      <div className="glass border-b border-gray-200 px-4 py-3 flex items-center justify-between safe-top">
+        <button onClick={onClose} className="text-gray-500 hover:text-gray-900 text-sm font-medium flex items-center gap-1">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           Back
         </button>
-        <h2 className="font-semibold text-[#f0f0f5] text-base">Shopping List</h2>
-        <button onClick={handleShare} className="text-[#8888a0] hover:text-[#f0f0f5]">
+        <h2 className="font-semibold text-gray-900 text-base">Shopping List</h2>
+        <button onClick={handleShare} className="text-gray-500 hover:text-gray-900">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
           </svg>
@@ -132,8 +132,8 @@ export default function ShoppingList({
       </div>
 
       {/* Progress */}
-      <div className="px-4 py-2 border-b border-[#2a2a3a] flex items-center justify-between">
-        <p className="text-xs text-[#55556a]">{uncheckedCount} item{uncheckedCount !== 1 ? "s" : ""} left</p>
+      <div className="px-4 py-2 border-b border-gray-200 flex items-center justify-between">
+        <p className="text-xs text-gray-500">{uncheckedCount} item{uncheckedCount !== 1 ? "s" : ""} left</p>
         {checkedCount > 0 && <p className="text-xs text-green-500">{checkedCount} done</p>}
       </div>
 
@@ -144,13 +144,13 @@ export default function ShoppingList({
             <li
               key={item.id}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                item.checked ? "bg-white/[0.02]" : "bg-[#16161e]"
+                item.checked ? "bg-gray-50" : "bg-white border border-gray-100"
               }`}
             >
               <button
                 onClick={() => toggleItem(item.id)}
                 className={`w-5 h-5 rounded-md border-2 shrink-0 flex items-center justify-center transition-all ${
-                  item.checked ? "bg-green-500 border-green-500" : "border-[#3a3a4a]"
+                  item.checked ? "bg-green-500 border-green-500" : "border-gray-300"
                 }`}
               >
                 {item.checked && (
@@ -159,10 +159,10 @@ export default function ShoppingList({
                   </svg>
                 )}
               </button>
-              <span className={`flex-1 text-sm ${item.checked ? "line-through text-[#3a3a4a]" : "text-[#c0c0d0]"}`}>
+              <span className={`flex-1 text-sm ${item.checked ? "line-through text-gray-400" : "text-gray-700"}`}>
                 {item.text}
               </span>
-              <button onClick={() => removeItem(item.id)} className="text-[#2a2a3a] hover:text-red-400 transition-colors p-1">
+              <button onClick={() => removeItem(item.id)} className="text-gray-300 hover:text-red-400 transition-colors p-1">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -173,7 +173,7 @@ export default function ShoppingList({
       </div>
 
       {/* Add item */}
-      <div className="glass border-t border-[#2a2a3a] px-4 py-3 safe-bottom">
+      <div className="glass border-t border-gray-200 px-4 py-3 safe-bottom">
         <div className="flex gap-2">
           <input
             ref={inputRef}
@@ -182,9 +182,9 @@ export default function ShoppingList({
             onChange={(e) => setNewItem(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addItem()}
             placeholder="Add an item..."
-            className="flex-1 min-w-0 px-4 py-2.5 bg-[#1c1c28] border border-[#2a2a3a] rounded-xl text-sm text-[#f0f0f5]
-                       focus:outline-none focus:ring-1 focus:ring-orange-500/50 focus:border-orange-500/50
-                       placeholder:text-[#55556a]"
+            className="flex-1 min-w-0 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900
+                       focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50
+                       placeholder:text-gray-400"
           />
           <button
             onClick={addItem}

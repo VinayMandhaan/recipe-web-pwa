@@ -73,7 +73,7 @@ function Ring({
           cy={size / 2}
           r={r}
           fill="none"
-          stroke="#1e1e2a"
+          stroke="#E5E7EB"
           strokeWidth={stroke}
         />
         <circle
@@ -116,17 +116,17 @@ function MacroBar({
   return (
     <div className="flex-1">
       <div className="flex items-center justify-between mb-1">
-        <span className="text-[10px] text-[#55556a] uppercase tracking-wider">{label}</span>
-        <span className="text-[10px] text-[#55556a]">{remaining}g left</span>
+        <span className="text-[10px] text-gray-500 uppercase tracking-wider">{label}</span>
+        <span className="text-[10px] text-gray-500">{remaining}g left</span>
       </div>
-      <div className="h-2 bg-[#1e1e2a] rounded-full overflow-hidden">
+      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
         <div
           className="h-full rounded-full transition-all duration-500"
           style={{ width: `${pct}%`, backgroundColor: color }}
         />
       </div>
-      <p className="text-xs text-[#c0c0d0] mt-1 font-medium">
-        {value}{unit} <span className="text-[#3a3a4a]">/ {max}{unit}</span>
+      <p className="text-xs text-gray-700 mt-1 font-medium">
+        {value}{unit} <span className="text-gray-400">/ {max}{unit}</span>
       </p>
     </div>
   );
@@ -200,44 +200,44 @@ function ProfileSetup({
   }
 
   const inputCls =
-    "w-full px-3 py-2.5 bg-[#16161e] border border-[#2a2a3a] rounded-xl text-sm text-[#f0f0f5] focus:outline-none focus:ring-1 focus:ring-orange-500/50 focus:border-orange-500/50 placeholder:text-[#3a3a4a]";
+    "w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50 placeholder:text-gray-400";
 
   if (step === "review" && targets) {
     return (
       <div className="flex-1 overflow-y-auto no-scrollbar">
         <div className="px-5 pt-6 pb-4">
-          <button onClick={() => setStep("form")} className="text-orange-500 text-sm mb-4 flex items-center gap-1">
+          <button onClick={() => setStep("form")} className="text-blue-500 text-sm mb-4 flex items-center gap-1">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             Back
           </button>
-          <h1 className="text-2xl font-bold text-[#f0f0f5]">Your Daily Targets</h1>
-          <p className="text-sm text-[#55556a] mt-1">
+          <h1 className="text-2xl font-bold text-gray-900">Your Daily Targets</h1>
+          <p className="text-sm text-gray-500 mt-1">
             Based on {GOAL_LABELS[goal].toLowerCase()} goal with {ACTIVITY_LABELS[activity].toLowerCase().split("(")[0].trim()} lifestyle
           </p>
         </div>
 
         <div className="px-5 space-y-3">
           {/* Suggested targets */}
-          <div className="bg-[#16161e] border border-[#2a2a3a] rounded-2xl p-5">
+          <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
             <div className="flex items-center justify-center mb-5">
-              <Ring value={targets.calories} max={targets.calories} size={130} stroke={12} color="#f97316">
-                <span className="text-2xl font-bold text-[#f0f0f5]">{editingTargets ? Number(customCal) || targets.calories : targets.calories}</span>
-                <span className="text-[10px] text-[#55556a]">kcal/day</span>
+              <Ring value={targets.calories} max={targets.calories} size={130} stroke={12} color="#3B82F6">
+                <span className="text-2xl font-bold text-gray-900">{editingTargets ? Number(customCal) || targets.calories : targets.calories}</span>
+                <span className="text-[10px] text-gray-500">kcal/day</span>
               </Ring>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: "Protein", val: editingTargets ? customPro : targets.protein.toString(), color: "#f97316", unit: "g" },
+                { label: "Protein", val: editingTargets ? customPro : targets.protein.toString(), color: "#3B82F6", unit: "g" },
                 { label: "Carbs", val: editingTargets ? customCarb : targets.carbs.toString(), color: "#3b82f6", unit: "g" },
                 { label: "Fat", val: editingTargets ? customFat : targets.fat.toString(), color: "#a855f7", unit: "g" },
               ].map((m) => (
                 <div key={m.label} className="text-center">
                   <div className="w-2 h-2 rounded-full mx-auto mb-1" style={{ backgroundColor: m.color }} />
-                  <p className="text-lg font-bold text-[#f0f0f5]">{m.val}{m.unit}</p>
-                  <p className="text-[10px] text-[#55556a]">{m.label}</p>
+                  <p className="text-lg font-bold text-gray-900">{m.val}{m.unit}</p>
+                  <p className="text-[10px] text-gray-500">{m.label}</p>
                 </div>
               ))}
             </div>
@@ -247,35 +247,35 @@ function ProfileSetup({
           {!editingTargets ? (
             <button
               onClick={() => setEditingTargets(true)}
-              className="w-full py-3 text-sm text-orange-500 bg-orange-500/5 border border-orange-500/20 rounded-xl
-                         active:bg-orange-500/10 transition-colors"
+              className="w-full py-3 text-sm text-blue-500 bg-blue-50 border border-blue-200 rounded-xl
+                         active:bg-blue-100 transition-colors"
             >
               Customize targets
             </button>
           ) : (
-            <div className="bg-[#16161e] border border-[#2a2a3a] rounded-xl p-4 space-y-3">
-              <p className="text-xs text-[#55556a] font-medium">Set your own targets</p>
+            <div className="bg-white border border-gray-100 rounded-xl p-4 space-y-3">
+              <p className="text-xs text-gray-500 font-medium">Set your own targets</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] text-[#3a3a4a] mb-1 block">Calories (kcal)</label>
+                  <label className="text-[10px] text-gray-400 mb-1 block">Calories (kcal)</label>
                   <input type="number" value={customCal} onChange={(e) => setCustomCal(e.target.value)} className={inputCls} />
                 </div>
                 <div>
-                  <label className="text-[10px] text-[#3a3a4a] mb-1 block">Protein (g)</label>
+                  <label className="text-[10px] text-gray-400 mb-1 block">Protein (g)</label>
                   <input type="number" value={customPro} onChange={(e) => setCustomPro(e.target.value)} className={inputCls} />
                 </div>
                 <div>
-                  <label className="text-[10px] text-[#3a3a4a] mb-1 block">Carbs (g)</label>
+                  <label className="text-[10px] text-gray-400 mb-1 block">Carbs (g)</label>
                   <input type="number" value={customCarb} onChange={(e) => setCustomCarb(e.target.value)} className={inputCls} />
                 </div>
                 <div>
-                  <label className="text-[10px] text-[#3a3a4a] mb-1 block">Fat (g)</label>
+                  <label className="text-[10px] text-gray-400 mb-1 block">Fat (g)</label>
                   <input type="number" value={customFat} onChange={(e) => setCustomFat(e.target.value)} className={inputCls} />
                 </div>
               </div>
               <button
                 onClick={() => setEditingTargets(false)}
-                className="text-xs text-[#55556a] underline"
+                className="text-xs text-gray-500 underline"
               >
                 Reset to suggested
               </button>
@@ -286,8 +286,8 @@ function ProfileSetup({
           <button
             onClick={handleConfirm}
             disabled={saving}
-            className="w-full py-3.5 bg-orange-500 text-white font-semibold rounded-xl
-                       active:bg-orange-600 transition-colors disabled:opacity-50"
+            className="w-full py-3.5 bg-blue-500 text-white font-semibold rounded-xl
+                       active:bg-blue-600 transition-colors disabled:opacity-50"
           >
             {saving ? "Saving..." : "Start tracking"}
           </button>
@@ -299,8 +299,8 @@ function ProfileSetup({
   return (
     <div className="flex-1 overflow-y-auto no-scrollbar">
       <div className="px-5 pt-6 pb-4">
-        <h1 className="text-2xl font-bold text-[#f0f0f5]">Set Up Your Macros</h1>
-        <p className="text-sm text-[#55556a] mt-1">
+        <h1 className="text-2xl font-bold text-gray-900">Set Up Your Macros</h1>
+        <p className="text-sm text-gray-500 mt-1">
           Tell us about yourself so we can calculate your daily targets
         </p>
       </div>
@@ -308,7 +308,7 @@ function ProfileSetup({
       <div className="px-5 space-y-4 pb-8">
         {/* Gender */}
         <div>
-          <label className="text-xs text-[#55556a] font-medium mb-2 block">Gender</label>
+          <label className="text-xs text-gray-500 font-medium mb-2 block">Gender</label>
           <div className="flex gap-2">
             {(["male", "female"] as Gender[]).map((g) => (
               <button
@@ -316,8 +316,8 @@ function ProfileSetup({
                 onClick={() => setGender(g)}
                 className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
                   gender === g
-                    ? "bg-orange-500/15 text-orange-400 border-orange-500/30"
-                    : "bg-[#16161e] text-[#55556a] border-[#2a2a3a] active:bg-[#1e1e2a]"
+                    ? "bg-blue-50 text-blue-500 border-blue-200"
+                    : "bg-white text-gray-500 border-gray-100 active:bg-gray-50"
                 }`}
               >
                 {g === "male" ? "Male" : "Female"}
@@ -328,7 +328,7 @@ function ProfileSetup({
 
         {/* Age */}
         <div>
-          <label className="text-xs text-[#55556a] font-medium mb-2 block">Age</label>
+          <label className="text-xs text-gray-500 font-medium mb-2 block">Age</label>
           <input
             type="number"
             value={age}
@@ -340,7 +340,7 @@ function ProfileSetup({
 
         {/* Height */}
         <div>
-          <label className="text-xs text-[#55556a] font-medium mb-2 block">Height (cm)</label>
+          <label className="text-xs text-gray-500 font-medium mb-2 block">Height (cm)</label>
           <input
             type="number"
             value={height}
@@ -349,7 +349,7 @@ function ProfileSetup({
             className={inputCls}
           />
           {height && (
-            <p className="text-[10px] text-[#3a3a4a] mt-1">
+            <p className="text-[10px] text-gray-400 mt-1">
               {Math.floor(Number(height) / 30.48)}'{Math.round((Number(height) % 30.48) / 2.54)}"
             </p>
           )}
@@ -357,7 +357,7 @@ function ProfileSetup({
 
         {/* Weight */}
         <div>
-          <label className="text-xs text-[#55556a] font-medium mb-2 block">Weight (kg)</label>
+          <label className="text-xs text-gray-500 font-medium mb-2 block">Weight (kg)</label>
           <input
             type="number"
             value={weight}
@@ -366,7 +366,7 @@ function ProfileSetup({
             className={inputCls}
           />
           {weight && (
-            <p className="text-[10px] text-[#3a3a4a] mt-1">
+            <p className="text-[10px] text-gray-400 mt-1">
               {Math.round(Number(weight) * 2.205)} lbs
             </p>
           )}
@@ -374,7 +374,7 @@ function ProfileSetup({
 
         {/* Activity level */}
         <div>
-          <label className="text-xs text-[#55556a] font-medium mb-2 block">Activity level</label>
+          <label className="text-xs text-gray-500 font-medium mb-2 block">Activity level</label>
           <div className="space-y-2">
             {(Object.entries(ACTIVITY_LABELS) as [ActivityLevel, string][]).map(([key, label]) => (
               <button
@@ -382,8 +382,8 @@ function ProfileSetup({
                 onClick={() => setActivity(key)}
                 className={`w-full px-4 py-3 rounded-xl text-left text-sm border transition-colors ${
                   activity === key
-                    ? "bg-orange-500/15 text-orange-400 border-orange-500/30"
-                    : "bg-[#16161e] text-[#55556a] border-[#2a2a3a] active:bg-[#1e1e2a]"
+                    ? "bg-blue-50 text-blue-500 border-blue-200"
+                    : "bg-white text-gray-500 border-gray-100 active:bg-gray-50"
                 }`}
               >
                 {label}
@@ -394,7 +394,7 @@ function ProfileSetup({
 
         {/* Goal */}
         <div>
-          <label className="text-xs text-[#55556a] font-medium mb-2 block">Goal</label>
+          <label className="text-xs text-gray-500 font-medium mb-2 block">Goal</label>
           <div className="flex gap-2">
             {(Object.entries(GOAL_LABELS) as [Goal, string][]).map(([key, label]) => (
               <button
@@ -402,8 +402,8 @@ function ProfileSetup({
                 onClick={() => setGoal(key)}
                 className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
                   goal === key
-                    ? "bg-orange-500/15 text-orange-400 border-orange-500/30"
-                    : "bg-[#16161e] text-[#55556a] border-[#2a2a3a] active:bg-[#1e1e2a]"
+                    ? "bg-blue-50 text-blue-500 border-blue-200"
+                    : "bg-white text-gray-500 border-gray-100 active:bg-gray-50"
                 }`}
               >
                 {label}
@@ -416,8 +416,8 @@ function ProfileSetup({
         <button
           onClick={handleCalculate}
           disabled={!age || !height || !weight}
-          className="w-full py-3.5 bg-orange-500 text-white font-semibold rounded-xl
-                     active:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+          className="w-full py-3.5 bg-blue-500 text-white font-semibold rounded-xl
+                     active:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
         >
           Calculate my macros
         </button>
@@ -452,7 +452,7 @@ function AddMealModal({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const inputCls =
-    "w-full px-3 py-2.5 bg-[#0a0a0f] border border-[#2a2a3a] rounded-xl text-sm text-[#f0f0f5] focus:outline-none focus:ring-1 focus:ring-orange-500/50 placeholder:text-[#3a3a4a]";
+    "w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50 placeholder:text-gray-400";
 
   const mealInfo = MEAL_TYPES.find((m) => m.key === mealType);
 
@@ -542,9 +542,9 @@ function AddMealModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative w-full max-w-[480px] bg-[#16161e] rounded-t-2xl border-t border-[#2a2a3a] p-5 pb-8 animate-slide-up max-h-[85vh] overflow-y-auto no-scrollbar">
-        <div className="w-10 h-1 bg-[#2a2a3a] rounded-full mx-auto mb-4" />
+      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
+      <div className="relative w-full max-w-[480px] bg-white rounded-t-2xl border-t border-gray-200 shadow-xl p-5 pb-8 animate-slide-up max-h-[85vh] overflow-y-auto no-scrollbar">
+        <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
 
         <input
           ref={fileRef}
@@ -557,10 +557,10 @@ function AddMealModal({
         {/* Mode: Choose */}
         {mode === "choose" && !scanning && (
           <>
-            <h2 className="text-lg font-bold text-[#f0f0f5] mb-1">
+            <h2 className="text-lg font-bold text-gray-900 mb-1">
               {mealInfo?.emoji} Add to {mealInfo?.label}
             </h2>
-            <p className="text-xs text-[#3a3a4a] mb-5">How would you like to log this meal?</p>
+            <p className="text-xs text-gray-400 mb-5">How would you like to log this meal?</p>
 
             <div className="space-y-3">
               {/* Photo scan option */}
@@ -571,11 +571,11 @@ function AddMealModal({
                     fileRef.current.click();
                   }
                 }}
-                className="w-full flex items-center gap-4 p-4 bg-orange-500/5 border border-orange-500/20 rounded-xl
-                           active:bg-orange-500/10 transition-colors text-left"
+                className="w-full flex items-center gap-4 p-4 bg-blue-50 border border-blue-200 rounded-xl
+                           active:bg-blue-100 transition-colors text-left"
               >
-                <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
-                  <svg className="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                  <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                       d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -583,8 +583,8 @@ function AddMealModal({
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-orange-400">Take a photo</p>
-                  <p className="text-[10px] text-[#55556a] mt-0.5">AI scans your meal and fills macros automatically</p>
+                  <p className="text-sm font-medium text-blue-500">Take a photo</p>
+                  <p className="text-[10px] text-gray-500 mt-0.5">AI scans your meal and fills macros automatically</p>
                 </div>
               </button>
 
@@ -596,36 +596,36 @@ function AddMealModal({
                     fileRef.current.click();
                   }
                 }}
-                className="w-full flex items-center gap-4 p-4 bg-[#0a0a0f] border border-[#2a2a3a] rounded-xl
-                           active:bg-[#1e1e2a] transition-colors text-left"
+                className="w-full flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-xl
+                           active:bg-gray-50 transition-colors text-left"
               >
-                <div className="w-12 h-12 rounded-xl bg-[#16161e] border border-[#2a2a3a] flex items-center justify-center shrink-0">
-                  <svg className="w-6 h-6 text-[#55556a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 rounded-xl bg-white border border-gray-100 flex items-center justify-center shrink-0">
+                  <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                       d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-[#c0c0d0]">Upload photo</p>
-                  <p className="text-[10px] text-[#55556a] mt-0.5">Pick from gallery for AI analysis</p>
+                  <p className="text-sm font-medium text-gray-700">Upload photo</p>
+                  <p className="text-[10px] text-gray-500 mt-0.5">Pick from gallery for AI analysis</p>
                 </div>
               </button>
 
               {/* Manual entry option */}
               <button
                 onClick={() => setMode("manual")}
-                className="w-full flex items-center gap-4 p-4 bg-[#0a0a0f] border border-[#2a2a3a] rounded-xl
-                           active:bg-[#1e1e2a] transition-colors text-left"
+                className="w-full flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-xl
+                           active:bg-gray-50 transition-colors text-left"
               >
-                <div className="w-12 h-12 rounded-xl bg-[#16161e] border border-[#2a2a3a] flex items-center justify-center shrink-0">
-                  <svg className="w-6 h-6 text-[#55556a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 rounded-xl bg-white border border-gray-100 flex items-center justify-center shrink-0">
+                  <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                       d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-[#c0c0d0]">Type manually</p>
-                  <p className="text-[10px] text-[#55556a] mt-0.5">Enter dish name and macros yourself</p>
+                  <p className="text-sm font-medium text-gray-700">Type manually</p>
+                  <p className="text-[10px] text-gray-500 mt-0.5">Enter dish name and macros yourself</p>
                 </div>
               </button>
             </div>
@@ -639,12 +639,12 @@ function AddMealModal({
               <img
                 src={imagePreview}
                 alt="Meal"
-                className="w-full aspect-[4/3] object-cover rounded-2xl border border-[#2a2a3a] mb-4"
+                className="w-full aspect-[4/3] object-cover rounded-2xl border border-gray-100 mb-4"
               />
             )}
             <div className="flex items-center justify-center gap-3 py-4">
-              <span className="w-5 h-5 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
-              <span className="text-sm text-[#55556a]">Analyzing your meal...</span>
+              <span className="w-5 h-5 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+              <span className="text-sm text-gray-500">Analyzing your meal...</span>
             </div>
             <div className="space-y-2 mt-2">
               {[...Array(3)].map((_, i) => (
@@ -667,7 +667,7 @@ function AddMealModal({
         {/* Mode: Manual (also shown after photo scan with auto-filled values) */}
         {mode === "manual" && !scanning && (
           <>
-            <h2 className="text-lg font-bold text-[#f0f0f5] mb-1">
+            <h2 className="text-lg font-bold text-gray-900 mb-1">
               {mealInfo?.emoji} Add to {mealInfo?.label}
             </h2>
 
@@ -676,7 +676,7 @@ function AddMealModal({
                 <img
                   src={imagePreview}
                   alt="Meal"
-                  className="w-full aspect-[3/2] object-cover rounded-xl border border-[#2a2a3a]"
+                  className="w-full aspect-[3/2] object-cover rounded-xl border border-gray-100"
                 />
                 <p className="text-[10px] text-green-400 mt-1.5 flex items-center gap-1">
                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
@@ -688,12 +688,12 @@ function AddMealModal({
             )}
 
             {!imagePreview && (
-              <p className="text-xs text-[#3a3a4a] mb-4">Enter the dish name and nutritional values</p>
+              <p className="text-xs text-gray-400 mb-4">Enter the dish name and nutritional values</p>
             )}
 
             <div className="space-y-3">
               <div>
-                <label className="text-[10px] text-[#55556a] mb-1 block">Dish name</label>
+                <label className="text-[10px] text-gray-500 mb-1 block">Dish name</label>
                 <input
                   type="text"
                   value={name}
@@ -706,19 +706,19 @@ function AddMealModal({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] text-[#55556a] mb-1 block">Calories (kcal)</label>
+                  <label className="text-[10px] text-gray-500 mb-1 block">Calories (kcal)</label>
                   <input type="number" value={cal} onChange={(e) => setCal(e.target.value)} placeholder="0" className={inputCls} />
                 </div>
                 <div>
-                  <label className="text-[10px] text-[#55556a] mb-1 block">Protein (g)</label>
+                  <label className="text-[10px] text-gray-500 mb-1 block">Protein (g)</label>
                   <input type="number" value={pro} onChange={(e) => setPro(e.target.value)} placeholder="0" className={inputCls} />
                 </div>
                 <div>
-                  <label className="text-[10px] text-[#55556a] mb-1 block">Carbs (g)</label>
+                  <label className="text-[10px] text-gray-500 mb-1 block">Carbs (g)</label>
                   <input type="number" value={carb} onChange={(e) => setCarb(e.target.value)} placeholder="0" className={inputCls} />
                 </div>
                 <div>
-                  <label className="text-[10px] text-[#55556a] mb-1 block">Fat (g)</label>
+                  <label className="text-[10px] text-gray-500 mb-1 block">Fat (g)</label>
                   <input type="number" value={fat} onChange={(e) => setFat(e.target.value)} placeholder="0" className={inputCls} />
                 </div>
               </div>
@@ -734,8 +734,8 @@ function AddMealModal({
                   })
                 }
                 disabled={!name.trim() || adding}
-                className="w-full py-3 bg-orange-500 text-white font-semibold rounded-xl
-                           active:bg-orange-600 transition-colors disabled:opacity-50 mt-1"
+                className="w-full py-3 bg-blue-500 text-white font-semibold rounded-xl
+                           active:bg-blue-600 transition-colors disabled:opacity-50 mt-1"
               >
                 {adding ? "Adding..." : "Add meal"}
               </button>
@@ -744,7 +744,7 @@ function AddMealModal({
               {!imagePreview && (
                 <button
                   onClick={() => setMode("choose")}
-                  className="w-full py-2 text-xs text-[#55556a] active:text-[#8888a0] transition-colors"
+                  className="w-full py-2 text-xs text-gray-500 active:text-gray-500 transition-colors"
                 >
                   Back
                 </button>
@@ -931,10 +931,10 @@ export default function MacrosTab() {
         {/* Header */}
         <div className="px-5 pt-6 pb-2">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-[#f0f0f5]">Macros</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Macros</h1>
             <button
               onClick={() => setShowEditProfile(true)}
-              className="p-2 text-[#55556a] active:text-orange-500 transition-colors"
+              className="p-2 text-gray-500 active:text-blue-500 transition-colors"
               title="Edit targets"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -948,17 +948,17 @@ export default function MacrosTab() {
 
         {/* Date navigator */}
         <div className="px-5 pb-3">
-          <div className="flex items-center justify-between bg-[#16161e] border border-[#2a2a3a] rounded-xl px-4 py-2.5">
-            <button onClick={() => shiftDate(-1)} className="p-1 text-[#55556a] active:text-orange-500">
+          <div className="flex items-center justify-between bg-white border border-gray-100 rounded-xl px-4 py-2.5 shadow-sm">
+            <button onClick={() => shiftDate(-1)} className="p-1 text-gray-500 active:text-blue-500">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <span className="text-sm font-medium text-[#f0f0f5]">{formatDate(selectedDate)}</span>
+            <span className="text-sm font-medium text-gray-900">{formatDate(selectedDate)}</span>
             <button
               onClick={() => shiftDate(1)}
               disabled={isToday}
-              className="p-1 text-[#55556a] active:text-orange-500 disabled:opacity-30"
+              className="p-1 text-gray-500 active:text-blue-500 disabled:opacity-30"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -969,16 +969,16 @@ export default function MacrosTab() {
 
         {/* Calorie ring + macro bars */}
         <div className="px-5 pb-4">
-          <div className="bg-[#16161e] border border-[#2a2a3a] rounded-2xl p-5">
+          <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
             <div className="flex items-center justify-center mb-5">
-              <Ring value={totals.calories} max={profile.target_calories} size={140} stroke={12} color="#f97316">
-                <span className="text-3xl font-bold text-[#f0f0f5]">{remaining.calories}</span>
-                <span className="text-[10px] text-[#55556a]">kcal remaining</span>
+              <Ring value={totals.calories} max={profile.target_calories} size={140} stroke={12} color="#3B82F6">
+                <span className="text-3xl font-bold text-gray-900">{remaining.calories}</span>
+                <span className="text-[10px] text-gray-500">kcal remaining</span>
               </Ring>
             </div>
 
             <div className="flex gap-4">
-              <MacroBar label="Protein" value={Math.round(totals.protein)} max={profile.target_protein} unit="g" color="#f97316" />
+              <MacroBar label="Protein" value={Math.round(totals.protein)} max={profile.target_protein} unit="g" color="#3B82F6" />
               <MacroBar label="Carbs" value={Math.round(totals.carbs)} max={profile.target_carbs} unit="g" color="#3b82f6" />
               <MacroBar label="Fat" value={Math.round(totals.fat)} max={profile.target_fat} unit="g" color="#a855f7" />
             </div>
@@ -992,22 +992,22 @@ export default function MacrosTab() {
             const mealCal = mealLogs.reduce((s, l) => s + Number(l.calories), 0);
 
             return (
-              <div key={meal.key} className="bg-[#16161e] border border-[#2a2a3a] rounded-xl overflow-hidden">
+              <div key={meal.key} className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
                 {/* Meal header */}
                 <div className="flex items-center justify-between px-4 py-3">
                   <div className="flex items-center gap-2">
                     <span className="text-base">{meal.emoji}</span>
-                    <span className="text-sm font-medium text-[#f0f0f5]">{meal.label}</span>
+                    <span className="text-sm font-medium text-gray-900">{meal.label}</span>
                     {mealCal > 0 && (
-                      <span className="text-[10px] text-[#55556a] bg-[#0a0a0f] px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] text-gray-500 bg-white px-2 py-0.5 rounded-full">
                         {mealCal} kcal
                       </span>
                     )}
                   </div>
                   <button
                     onClick={() => setAddMealType(meal.key)}
-                    className="w-7 h-7 rounded-lg bg-orange-500/10 text-orange-500 flex items-center justify-center
-                               active:bg-orange-500/20 transition-colors"
+                    className="w-7 h-7 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center
+                               active:bg-blue-100 transition-colors"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -1017,24 +1017,24 @@ export default function MacrosTab() {
 
                 {/* Logged items */}
                 {mealLogs.length > 0 && (
-                  <div className="border-t border-[#2a2a3a]">
+                  <div className="border-t border-gray-100">
                     {mealLogs.map((log) => (
                       <div
                         key={log.id}
-                        className="flex items-center justify-between px-4 py-2.5 border-b border-[#2a2a3a] last:border-b-0"
+                        className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 last:border-b-0"
                       >
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-[#c0c0d0] truncate">{log.dish_name}</p>
+                          <p className="text-xs text-gray-700 truncate">{log.dish_name}</p>
                           <div className="flex gap-3 mt-0.5">
-                            <span className="text-[10px] text-[#55556a]">{log.calories} cal</span>
-                            <span className="text-[10px] text-orange-400/70">P {log.protein}g</span>
+                            <span className="text-[10px] text-gray-500">{log.calories} cal</span>
+                            <span className="text-[10px] text-blue-500/70">P {log.protein}g</span>
                             <span className="text-[10px] text-blue-400/70">C {log.carbs}g</span>
                             <span className="text-[10px] text-purple-400/70">F {log.fat}g</span>
                           </div>
                         </div>
                         <button
                           onClick={() => deleteMeal(log.id)}
-                          className="p-1.5 text-[#3a3a4a] active:text-red-400 transition-colors shrink-0"
+                          className="p-1.5 text-gray-400 active:text-red-400 transition-colors shrink-0"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1052,28 +1052,28 @@ export default function MacrosTab() {
         {/* Daily summary */}
         {logs.length > 0 && (
           <div className="px-5 pb-6">
-            <div className="bg-orange-500/5 border border-orange-500/15 rounded-xl p-4">
-              <p className="text-xs font-medium text-orange-400 mb-2">Daily Summary</p>
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <p className="text-xs font-medium text-blue-500 mb-2">Daily Summary</p>
               <div className="grid grid-cols-4 gap-2 text-center">
                 <div>
-                  <p className="text-sm font-bold text-[#f0f0f5]">{Math.round(totals.calories)}</p>
-                  <p className="text-[9px] text-[#55556a]">Calories</p>
+                  <p className="text-sm font-bold text-gray-900">{Math.round(totals.calories)}</p>
+                  <p className="text-[9px] text-gray-500">Calories</p>
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-orange-400">{Math.round(totals.protein)}g</p>
-                  <p className="text-[9px] text-[#55556a]">Protein</p>
+                  <p className="text-sm font-bold text-blue-500">{Math.round(totals.protein)}g</p>
+                  <p className="text-[9px] text-gray-500">Protein</p>
                 </div>
                 <div>
                   <p className="text-sm font-bold text-blue-400">{Math.round(totals.carbs)}g</p>
-                  <p className="text-[9px] text-[#55556a]">Carbs</p>
+                  <p className="text-[9px] text-gray-500">Carbs</p>
                 </div>
                 <div>
                   <p className="text-sm font-bold text-purple-400">{Math.round(totals.fat)}g</p>
-                  <p className="text-[9px] text-[#55556a]">Fat</p>
+                  <p className="text-[9px] text-gray-500">Fat</p>
                 </div>
               </div>
               {totals.calories > 0 && totals.calories < profile.target_calories && (
-                <p className="text-[10px] text-[#55556a] text-center mt-3">
+                <p className="text-[10px] text-gray-500 text-center mt-3">
                   {remaining.calories} kcal and {remaining.protein}g protein remaining for the day
                 </p>
               )}

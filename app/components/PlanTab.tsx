@@ -161,13 +161,13 @@ export default function PlanTab() {
         <div className="px-5 pt-6 pb-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-[#f0f0f5]">Meal Plan</h1>
-              <p className="text-sm text-[#55556a] mt-1">Plan your meals for the month</p>
+              <h1 className="text-2xl font-bold text-gray-900">Meal Plan</h1>
+              <p className="text-sm text-gray-500 mt-1">Plan your meals for the month</p>
             </div>
             <button
               onClick={goToday}
-              className="px-3 py-1.5 bg-orange-500/10 text-orange-500 rounded-lg text-xs font-medium
-                         active:bg-orange-500/20 transition-colors"
+              className="px-3 py-1.5 bg-blue-50 text-blue-500 rounded-lg text-xs font-medium
+                         active:bg-blue-100 transition-colors"
             >
               Today
             </button>
@@ -176,15 +176,15 @@ export default function PlanTab() {
 
         {/* Month navigation */}
         <div className="px-5 pb-4 flex items-center justify-between">
-          <button onClick={prevMonth} className="p-2 text-[#55556a] active:text-[#f0f0f5]">
+          <button onClick={prevMonth} className="p-2 text-gray-500 active:text-gray-900">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h2 className="text-base font-semibold text-[#f0f0f5]">
+          <h2 className="text-base font-semibold text-gray-900">
             {MONTHS[month]} {year}
           </h2>
-          <button onClick={nextMonth} className="p-2 text-[#55556a] active:text-[#f0f0f5]">
+          <button onClick={nextMonth} className="p-2 text-gray-500 active:text-gray-900">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
@@ -196,7 +196,7 @@ export default function PlanTab() {
           {/* Day headers */}
           <div className="grid grid-cols-7 gap-1 mb-2">
             {DAYS.map((d) => (
-              <div key={d} className="text-center text-[10px] font-semibold text-[#55556a] uppercase">
+              <div key={d} className="text-center text-[10px] font-semibold text-gray-500 uppercase">
                 {d}
               </div>
             ))}
@@ -216,10 +216,10 @@ export default function PlanTab() {
                   onClick={() => setSelectedDay(selected ? null : day)}
                   className={`aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5 transition-colors relative ${
                     selected
-                      ? "bg-orange-500 text-white"
+                      ? "bg-blue-500 text-white"
                       : isToday(day)
-                        ? "bg-orange-500/15 text-orange-400"
-                        : "bg-[#16161e] text-[#c0c0d0] active:bg-[#1e1e2a]"
+                        ? "bg-blue-50 text-blue-500"
+                        : "bg-white border border-gray-100 text-gray-700 active:bg-gray-50"
                   }`}
                 >
                   <span className="text-xs font-medium">{day}</span>
@@ -229,12 +229,12 @@ export default function PlanTab() {
                         <span
                           key={p.id}
                           className={`w-1 h-1 rounded-full ${
-                            selected ? "bg-white/70" : MEAL_COLORS[p.meal_type] || "bg-orange-500"
+                            selected ? "bg-white/70" : MEAL_COLORS[p.meal_type] || "bg-blue-500"
                           }`}
                         />
                       ))}
                       {dayPlans.length > 3 && (
-                        <span className={`text-[6px] ${selected ? "text-white/70" : "text-[#55556a]"}`}>
+                        <span className={`text-[6px] ${selected ? "text-white/70" : "text-gray-500"}`}>
                           +{dayPlans.length - 3}
                         </span>
                       )}
@@ -250,7 +250,7 @@ export default function PlanTab() {
         {selectedDay && (
           <div className="px-5 pt-4 pb-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-[#f0f0f5]">
+              <h3 className="text-sm font-semibold text-gray-900">
                 {MONTHS[month]} {selectedDay}
               </h3>
               <div className="flex gap-1.5">
@@ -258,8 +258,8 @@ export default function PlanTab() {
                   <button
                     key={mt.key}
                     onClick={() => openRecipePicker(mt.key)}
-                    className="px-2 py-1 bg-white/5 text-[#55556a] rounded-lg text-[10px] font-medium
-                               active:bg-orange-500/15 active:text-orange-400 transition-colors"
+                    className="px-2 py-1 bg-gray-50 text-gray-500 rounded-lg text-[10px] font-medium
+                               active:bg-blue-50 active:text-blue-500 transition-colors"
                   >
                     {mt.emoji}
                   </button>
@@ -268,9 +268,9 @@ export default function PlanTab() {
             </div>
 
             {selectedPlans.length === 0 ? (
-              <div className="bg-[#16161e] border border-[#2a2a3a] border-dashed rounded-xl p-6 text-center">
-                <p className="text-sm text-[#55556a]">No meals planned</p>
-                <p className="text-xs text-[#3a3a4a] mt-1">Tap a meal icon above to add a recipe</p>
+              <div className="bg-white border border-gray-100 border-dashed rounded-xl p-6 text-center shadow-sm">
+                <p className="text-sm text-gray-500">No meals planned</p>
+                <p className="text-xs text-gray-400 mt-1">Tap a meal icon above to add a recipe</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -279,21 +279,21 @@ export default function PlanTab() {
                   return (
                     <div
                       key={p.id}
-                      className="bg-[#16161e] border border-[#2a2a3a] rounded-xl p-3.5 flex items-center gap-3"
+                      className="bg-white border border-gray-100 rounded-xl p-3.5 flex items-center gap-3 shadow-sm"
                     >
                       <span className="text-lg">{mt?.emoji || "🍽️"}</span>
                       <button
                         onClick={() => setViewRecipe(p.saved_recipes)}
                         className="flex-1 min-w-0 text-left"
                       >
-                        <p className="text-sm font-medium text-[#f0f0f5] truncate">
+                        <p className="text-sm font-medium text-gray-900 truncate">
                           {p.saved_recipes.dish}
                         </p>
-                        <p className="text-[10px] text-[#55556a] capitalize">{p.meal_type}</p>
+                        <p className="text-[10px] text-gray-500 capitalize">{p.meal_type}</p>
                       </button>
                       <button
                         onClick={() => removeFromPlan(p.id)}
-                        className="p-1.5 text-[#3a3a4a] active:text-red-400 transition-colors"
+                        className="p-1.5 text-gray-400 active:text-red-400 transition-colors"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -310,9 +310,9 @@ export default function PlanTab() {
         {/* No day selected hint */}
         {!selectedDay && !loading && (
           <div className="px-5 pt-4 pb-6">
-            <div className="bg-[#16161e] border border-[#2a2a3a] rounded-xl p-5 text-center">
-              <p className="text-sm text-[#55556a]">Tap a date to plan meals</p>
-              <p className="text-xs text-[#3a3a4a] mt-1">
+            <div className="bg-white border border-gray-100 rounded-xl p-5 text-center shadow-sm">
+              <p className="text-sm text-gray-500">Tap a date to plan meals</p>
+              <p className="text-xs text-gray-400 mt-1">
                 Color dots show planned meals for each day
               </p>
             </div>
@@ -322,19 +322,19 @@ export default function PlanTab() {
 
       {/* Recipe picker overlay */}
       {showRecipePicker && (
-        <div className="fixed inset-0 z-50 bg-[#06060a] flex justify-center">
-        <div className="flex flex-col w-full max-w-[480px] bg-[#0a0a0f] safe-top safe-bottom
-                        lg:border-x lg:border-[#2a2a3a]">
-          <div className="flex items-center gap-3 px-5 py-4 border-b border-[#2a2a3a]">
+        <div className="fixed inset-0 z-50 bg-white/80 backdrop-blur-sm flex justify-center">
+        <div className="flex flex-col w-full max-w-[480px] bg-white safe-top safe-bottom
+                        lg:border-x lg:border-gray-200">
+          <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
             <button
               onClick={() => setShowRecipePicker(false)}
-              className="p-1 -ml-1 text-[#8888a0] active:text-[#f0f0f5]"
+              className="p-1 -ml-1 text-gray-500 active:text-gray-900"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <h1 className="text-lg font-semibold text-[#f0f0f5]">
+            <h1 className="text-lg font-semibold text-gray-900">
               Add {MEAL_TYPES.find((m) => m.key === pickerMealType)?.label || "Meal"}
             </h1>
           </div>
@@ -342,8 +342,8 @@ export default function PlanTab() {
           <div className="flex-1 overflow-y-auto no-scrollbar">
             {savedRecipes.length === 0 ? (
               <div className="flex flex-col items-center justify-center text-center px-8 pt-20">
-                <p className="text-sm text-[#55556a]">No saved recipes</p>
-                <p className="text-xs text-[#3a3a4a] mt-1">
+                <p className="text-sm text-gray-500">No saved recipes</p>
+                <p className="text-xs text-gray-400 mt-1">
                   Save some recipes first, then add them to your meal plan
                 </p>
               </div>
@@ -353,16 +353,16 @@ export default function PlanTab() {
                   <button
                     key={r.id}
                     onClick={() => addToPlan(r)}
-                    className="w-full bg-[#16161e] border border-[#2a2a3a] rounded-xl p-4
-                               active:bg-[#1e1e2a] transition-colors text-left flex items-center gap-3"
+                    className="w-full bg-white border border-gray-100 rounded-xl p-4 shadow-sm
+                               active:bg-gray-50 transition-colors text-left flex items-center gap-3"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-[#f0f0f5] truncate">{r.dish}</p>
-                      <p className="text-[10px] text-[#55556a] mt-1">
+                      <p className="text-sm font-medium text-gray-900 truncate">{r.dish}</p>
+                      <p className="text-[10px] text-gray-500 mt-1">
                         {r.ingredients.length} ingredients, {r.steps.length} steps
                       </p>
                     </div>
-                    <svg className="w-5 h-5 text-orange-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
                   </button>

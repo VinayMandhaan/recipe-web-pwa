@@ -9,15 +9,15 @@ import HomeTab from "./components/HomeTab";
 import RecipesTab from "./components/RecipesTab";
 import PlanTab from "./components/PlanTab";
 import MacrosTab from "./components/MacrosTab";
-import HistoryTab from "./components/HistoryTab";
-import AccountTab from "./components/AccountTab";
+import SnapMeal from "./components/SnapMeal";
 
-type Tab = "home" | "recipes" | "plan" | "macros" | "history" | "account";
+type Tab = "home" | "recipes" | "plan" | "macros";
 
 function AppShell() {
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [showWelcome, setShowWelcome] = useState<boolean | null>(null);
+  const [showSnapMeal, setShowSnapMeal] = useState(false);
 
   useEffect(() => {
     setShowWelcome(!localStorage.getItem("onboarded"));
@@ -82,9 +82,8 @@ function AppShell() {
         {activeTab === "recipes" && <RecipesTab />}
         {activeTab === "plan" && <PlanTab />}
         {activeTab === "macros" && <MacrosTab />}
-        {activeTab === "history" && <HistoryTab />}
-        {activeTab === "account" && <AccountTab />}
-        <BottomTabs active={activeTab} onChange={setActiveTab} />
+        <BottomTabs active={activeTab} onChange={setActiveTab} onCamera={() => setShowSnapMeal(true)} />
+        {showSnapMeal && <SnapMeal onClose={() => setShowSnapMeal(false)} />}
       </div>
     </div>
   );

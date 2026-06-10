@@ -25,7 +25,7 @@ const STAGE_COLORS: Record<string, string> = {
   caption: "bg-green-500",
   blog: "bg-blue-500",
   transcript: "bg-purple-500",
-  fallback: "bg-[#3a3a4a]",
+  fallback: "bg-gray-300",
 };
 
 function timeAgo(dateStr: string) {
@@ -59,17 +59,10 @@ export default function HistoryTab() {
   return (
     <>
       <div className="flex-1 overflow-y-auto no-scrollbar">
-        <div className="px-5 pt-6 pb-4">
-          <h1 className="text-2xl font-bold text-[#f0f0f5]">History</h1>
-          <p className="text-sm text-[#55556a] mt-1">
-            {history.length > 0 ? `${history.length} extractions` : "Your recent extractions"}
-          </p>
-        </div>
-
         {loading ? (
           <div className="px-5 space-y-3">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-[#16161e] border border-[#2a2a3a] rounded-xl p-4 space-y-2">
+              <div key={i} className="bg-white border border-gray-100 rounded-xl p-4 space-y-2">
                 <div className="h-4 shimmer rounded w-3/4" />
                 <div className="h-3 shimmer rounded w-1/3" />
               </div>
@@ -77,46 +70,46 @@ export default function HistoryTab() {
           </div>
         ) : history.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center px-8 pt-20">
-            <div className="w-16 h-16 rounded-2xl bg-[#16161e] border border-[#2a2a3a] flex items-center justify-center mb-4">
-              <svg className="w-7 h-7 text-[#3a3a4a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-16 h-16 rounded-2xl bg-white border border-gray-100 flex items-center justify-center mb-4">
+              <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <p className="text-sm text-[#55556a]">No history yet</p>
-            <p className="text-xs text-[#3a3a4a] mt-1">Extracted recipes will appear here</p>
+            <p className="text-sm text-gray-500">No history yet</p>
+            <p className="text-xs text-gray-400 mt-1">Extracted recipes will appear here</p>
           </div>
         ) : (
           <div className="px-5 pb-6 space-y-3">
             {history.map((item) => {
               const hasRecipe = item.result && item.stage !== "fallback";
-              const dotColor = STAGE_COLORS[item.stage || "fallback"] || "bg-[#3a3a4a]";
+              const dotColor = STAGE_COLORS[item.stage || "fallback"] || "bg-gray-300";
 
               return (
                 <button
                   key={item.id}
                   onClick={() => hasRecipe && setSelected(item)}
                   disabled={!hasRecipe}
-                  className={`w-full bg-[#16161e] border border-[#2a2a3a] rounded-xl p-4 text-left
-                              transition-colors ${hasRecipe ? "active:bg-[#1e1e2a]" : "opacity-60"}`}
+                  className={`w-full bg-white border border-gray-100 rounded-xl p-4 text-left
+                              transition-colors ${hasRecipe ? "active:bg-gray-50" : "opacity-60"}`}
                 >
                   <div className="flex items-center gap-3">
                     {/* Status dot */}
                     <span className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-[#f0f0f5] truncate">
+                      <p className="text-sm font-medium text-gray-900 truncate">
                         {item.dish || "No recipe found"}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
                         {item.platform && (
-                          <span className="text-[10px] text-[#55556a] capitalize">{item.platform}</span>
+                          <span className="text-[10px] text-gray-500 capitalize">{item.platform}</span>
                         )}
-                        <span className="text-[10px] text-[#3a3a4a]">
+                        <span className="text-[10px] text-gray-400">
                           {timeAgo(item.searched_at)}
                         </span>
                       </div>
                     </div>
                     {hasRecipe && (
-                      <svg className="w-4 h-4 text-[#3a3a4a] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     )}

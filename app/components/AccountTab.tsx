@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "./AuthProvider";
+import HistoryTab from "./HistoryTab";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
 
@@ -22,6 +23,7 @@ export default function AccountTab() {
   const [notifLoading, setNotifLoading] = useState(false);
   const [notifSupported, setNotifSupported] = useState(false);
   const [notifError, setNotifError] = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
 
   const name = user?.name || "User";
   const email = user?.email || "";
@@ -32,7 +34,6 @@ export default function AccountTab() {
     .toUpperCase()
     .slice(0, 2);
 
-  // Check if push is supported and if user is subscribed
   const checkSubscription = useCallback(async () => {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
     setNotifSupported(true);
@@ -56,7 +57,6 @@ export default function AccountTab() {
 
     try {
       if (notifEnabled) {
-        // Unsubscribe
         const reg = await navigator.serviceWorker.ready;
         const sub = await reg.pushManager.getSubscription();
         if (sub) await sub.unsubscribe();
@@ -68,14 +68,12 @@ export default function AccountTab() {
         });
         setNotifEnabled(false);
       } else {
-        // Check VAPID key
         if (!VAPID_PUBLIC_KEY) {
           setNotifError("Push not configured. VAPID key missing.");
           setNotifLoading(false);
           return;
         }
 
-        // Request permission
         const permission = await Notification.requestPermission();
         if (permission === "denied") {
           setNotifError("Notifications blocked. Enable them in browser settings.");
@@ -87,10 +85,7 @@ export default function AccountTab() {
           return;
         }
 
-        // Wait for service worker
         const reg = await navigator.serviceWorker.ready;
-
-        // Subscribe
         const sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
@@ -122,36 +117,68 @@ export default function AccountTab() {
     }
   }
 
+  if (showHistory) {
+    return (
+      <div className="flex-1 flex flex-col">
+        <div className="flex items-center gap-3 px-5 pt-4 pb-2">
+          <button
+            onClick={() => setShowHistory(false)}
+            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center active:bg-gray-200"
+          >
+            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <h2 className="text-lg font-bold text-gray-900">History</h2>
+        </div>
+        <HistoryTab />
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 overflow-y-auto no-scrollbar">
-      <div className="px-5 pt-6 pb-4">
-        <h1 className="text-2xl font-bold text-[#f0f0f5]">Account</h1>
-      </div>
-
-      <div className="px-5 space-y-3">
+      <div className="px-5 pt-4 space-y-3">
         {/* Profile card */}
-        <div className="bg-[#16161e] border border-[#2a2a3a] rounded-2xl p-5 flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full gradient-accent flex items-center justify-center">
+        <div className="bg-white border border-gray-100 rounded-2xl p-5 flex items-center gap-4 shadow-sm">
+          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
             <span className="text-lg font-bold text-white">{initials}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-base font-semibold text-[#f0f0f5] truncate">{name}</p>
-            <p className="text-sm text-[#55556a] truncate">{email}</p>
+            <p className="text-base font-semibold text-gray-900 truncate">{name}</p>
+            <p className="text-sm text-gray-400 truncate">{email}</p>
           </div>
         </div>
 
-        {/* Settings */}
-        <div className="bg-[#16161e] border border-[#2a2a3a] rounded-xl overflow-hidden">
-          {/* Notifications toggle */}
-          <div className="px-4 py-3.5 flex items-center justify-between">
+        {/* Menu items */}
+        <div className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
+          {/* History */}
+          <button
+            onClick={() => setShowHistory(true)}
+            className="w-full px-4 py-3.5 flex items-center justify-between active:bg-gray-50 transition-colors"
+          >
             <div className="flex items-center gap-3">
-              <svg className="w-5 h-5 text-[#55556a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-sm text-gray-700">History</span>
+            </div>
+            <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+
+          {/* Notifications toggle */}
+          <div className="px-4 py-3.5 flex items-center justify-between border-t border-gray-100">
+            <div className="flex items-center gap-3">
+              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                   d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
               <div>
-                <span className="text-sm text-[#c0c0d0]">Meal reminders</span>
-                <p className="text-[10px] text-[#3a3a4a] mt-0.5">
+                <span className="text-sm text-gray-700">Meal reminders</span>
+                <p className="text-[10px] text-gray-400 mt-0.5">
                   {notifSupported
                     ? "Get notified when it's time to cook"
                     : "Not supported on this browser"}
@@ -163,7 +190,7 @@ export default function AccountTab() {
                 onClick={toggleNotifications}
                 disabled={notifLoading}
                 className={`w-11 h-6 rounded-full transition-colors relative ${
-                  notifEnabled ? "bg-orange-500" : "bg-[#2a2a3a]"
+                  notifEnabled ? "bg-blue-500" : "bg-gray-300"
                 } ${notifLoading ? "opacity-50" : ""}`}
               >
                 <span
@@ -173,31 +200,30 @@ export default function AccountTab() {
                 />
               </button>
             ) : (
-              <span className="text-[10px] text-[#3a3a4a]">Unavailable</span>
+              <span className="text-[10px] text-gray-400">Unavailable</span>
             )}
           </div>
           {notifError && (
             <div className="px-4 pb-3">
-              <p className="text-[11px] text-red-400 bg-red-500/10 rounded-lg px-3 py-2">{notifError}</p>
+              <p className="text-[11px] text-red-600 bg-red-50 rounded-lg px-3 py-2">{notifError}</p>
             </div>
           )}
 
           {/* App info */}
           {[
             { label: "App version", value: "1.0.0", icon: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
-            { label: "Theme", value: "Dark", icon: "M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" },
           ].map((item) => (
             <div
               key={item.label}
-              className="px-4 py-3.5 flex items-center justify-between border-t border-[#2a2a3a]"
+              className="px-4 py-3.5 flex items-center justify-between border-t border-gray-100"
             >
               <div className="flex items-center gap-3">
-                <svg className="w-5 h-5 text-[#55556a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
                 </svg>
-                <span className="text-sm text-[#c0c0d0]">{item.label}</span>
+                <span className="text-sm text-gray-700">{item.label}</span>
               </div>
-              <span className="text-sm text-[#55556a]">{item.value}</span>
+              <span className="text-sm text-gray-400">{item.value}</span>
             </div>
           ))}
         </div>
@@ -205,8 +231,8 @@ export default function AccountTab() {
         {/* Logout */}
         <button
           onClick={signOut}
-          className="w-full bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3.5
-                     text-red-400 text-sm font-medium active:bg-red-500/20 transition-colors"
+          className="w-full bg-red-50 border border-red-200 rounded-xl px-4 py-3.5
+                     text-red-500 text-sm font-medium active:bg-red-100 transition-colors"
         >
           Sign Out
         </button>
