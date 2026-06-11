@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-
-const GROQ_KEY = () => process.env.GROQ_API_KEY || "";
-const GROQ_MODEL = () => process.env.GROQ_MODEL || "llama-3.1-8b-instant";
+import { llmConfig } from "@/lib/llm";
 
 export async function POST(req: Request) {
   try {
@@ -14,7 +12,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const key = GROQ_KEY();
+    const { key, model, url } = llmConfig();
     if (!key) {
       return NextResponse.json(
         { error: "Nutrition estimation unavailable" },
@@ -49,14 +47,14 @@ export async function POST(req: Request) {
       `Return ONLY this JSON (per-serving values), no markdown:\n` +
       `{"calories":number,"protein_g":number,"carbs_g":number,"fat_g":number,"fiber_g":number,"servings":number,"serving_size":"1 plate","note":"Estimated based on standard ingredient portions"}`;
 
-    const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const r = await fetch(url, {
       method: "POST",
       headers: {
         "content-type": "application/json",
         authorization: `Bearer ${key}`,
       },
       body: JSON.stringify({
-        model: GROQ_MODEL(),
+        model,
         messages: [{ role: "user", content: prompt }],
         response_format: { type: "json_object" },
         temperature: 0,
@@ -65,7 +63,7 @@ export async function POST(req: Request) {
 
     const d = await r.json();
     if (d.error) {
-      console.error("Groq nutrition error:", d.error);
+      console.error("LLM nutrition error:", d.error);
       return NextResponse.json(
         { error: "Could not estimate nutrition" },
         { status: 500 }

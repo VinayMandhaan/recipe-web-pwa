@@ -1,16 +1,12 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
-
-const GROQ_KEY = () => process.env.GROQ_API_KEY || "";
-
-// Use vision-capable model for image analysis
-const VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct";
+import { llmConfig } from "@/lib/llm";
 
 export async function POST(req: Request) {
   try {
     const { image, step, ingredients, dish, user_id } = await req.json();
 
-    const key = GROQ_KEY();
+    const { key, model, url, visionModel } = llmConfig();
     if (!key) {
       return NextResponse.json(
         { error: "AI analysis unavailable" },
@@ -27,14 +23,14 @@ export async function POST(req: Request) {
         );
       }
 
-      const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      const r = await fetch(url, {
         method: "POST",
         headers: {
           "content-type": "application/json",
           authorization: `Bearer ${key}`,
         },
         body: JSON.stringify({
-          model: VISION_MODEL,
+          model: visionModel,
           messages: [
             {
               role: "user",
@@ -86,7 +82,7 @@ export async function POST(req: Request) {
 
       const d = await r.json();
       if (d.error) {
-        console.error("Groq vision error:", d.error);
+        console.error("LLM vision error:", d.error);
         return NextResponse.json(
           { error: d.error.message || "Could not analyze image" },
           { status: 500 }
@@ -151,14 +147,14 @@ export async function POST(req: Request) {
         `- If protein is below 15g, the first improvement MUST suggest a specific protein source with exact grams\n` +
         `- Be accurate above all else`;
 
-      const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      const r = await fetch(url, {
         method: "POST",
         headers: {
           "content-type": "application/json",
           authorization: `Bearer ${key}`,
         },
         body: JSON.stringify({
-          model: process.env.GROQ_MODEL || "llama-3.1-8b-instant",
+          model,
           messages: [{ role: "user", content: prompt }],
           response_format: { type: "json_object" },
           temperature: 0,
@@ -167,7 +163,7 @@ export async function POST(req: Request) {
 
       const d = await r.json();
       if (d.error) {
-        console.error("Groq nutrition error:", d.error);
+        console.error("LLM nutrition error:", d.error);
         return NextResponse.json(
           { error: "Could not estimate nutrition" },
           { status: 500 }

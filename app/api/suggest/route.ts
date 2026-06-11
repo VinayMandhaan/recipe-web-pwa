@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
-
-const GROQ_KEY = () => process.env.GROQ_API_KEY || "";
-const GROQ_MODEL = () => process.env.GROQ_MODEL || "llama-3.1-8b-instant";
+import { llmConfig } from "@/lib/llm";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,7 +13,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const key = GROQ_KEY();
+    const { key, model, url } = llmConfig();
     if (!key) {
       return NextResponse.json(
         { error: "AI suggestions unavailable" },
@@ -61,14 +59,14 @@ export async function POST(req: NextRequest) {
       `- Keep steps concise but complete\n` +
       `- Be creative and practical`;
 
-    const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const r = await fetch(url, {
       method: "POST",
       headers: {
         "content-type": "application/json",
         authorization: `Bearer ${key}`,
       },
       body: JSON.stringify({
-        model: GROQ_MODEL(),
+        model,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: query },
@@ -80,7 +78,7 @@ export async function POST(req: NextRequest) {
 
     const d = await r.json();
     if (d.error) {
-      console.error("Groq suggest error:", d.error);
+      console.error("LLM suggest error:", d.error);
       return NextResponse.json(
         { error: "Could not generate suggestions" },
         { status: 500 }

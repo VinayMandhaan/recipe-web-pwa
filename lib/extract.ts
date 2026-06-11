@@ -5,8 +5,7 @@ import { writeFileSync, readFileSync, existsSync, unlinkSync } from "fs";
 const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
 
-const GROQ_KEY = () => process.env.GROQ_API_KEY || "";
-const GROQ_MODEL = () => process.env.GROQ_MODEL || "llama-3.1-8b-instant";
+import { llmConfig } from "@/lib/llm";
 
 // ---- types ----
 
@@ -250,30 +249,33 @@ async function getCaption(url: string) {
   };
 }
 
-// ---- Groq LLM extraction ----
+// ---- LLM extraction ----
 
-async function groqExtract(
+async function llmExtract(
   text: string
 ): Promise<{ parsed?: RecipeResult; error?: string; skipped?: string }> {
-  const key = GROQ_KEY();
-  if (!key) return { skipped: "no GROQ_API_KEY" };
+  const { key, model, url } = llmConfig();
+  if (!key) return { skipped: "no LLM API key" };
 
   const prompt =
     "Parse this cooking content. Return ONLY JSON, no markdown: " +
     '{"is_recipe":bool,"dish":str,"ingredients":[str],"steps":[str],"confidence":"high"|"medium"|"low","note":str}. ' +
     "IMPORTANT: All output must be in English. Translate any Hindi, Urdu, or other non-English text to English. " +
-    "If no real recipe, is_recipe=false.\n\n" +
+    "If no real recipe, is_recipe=false. " +
+    "CRITICAL: Only return is_recipe=true if the text contains an ACTUAL recipe with real ingredients and cooking instructions. " +
+    "User comments, reviews, praise, or reactions are NOT recipes. If the text is just people saying 'I tried this' or 'thank you', set is_recipe=false. " +
+    "A valid recipe MUST have at least 3 specific ingredients with quantities.\n\n" +
     text.slice(0, 8000);
 
   try {
-    const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const r = await fetch(url, {
       method: "POST",
       headers: {
         "content-type": "application/json",
         authorization: `Bearer ${key}`,
       },
       body: JSON.stringify({
-        model: GROQ_MODEL(),
+        model,
         messages: [{ role: "user", content: prompt }],
         response_format: { type: "json_object" },
         temperature: 0,
@@ -291,7 +293,7 @@ function isGood(ex: { parsed?: RecipeResult }): boolean {
   return (
     !!ex?.parsed?.is_recipe &&
     ex.parsed.confidence !== "low" &&
-    (ex.parsed.ingredients || []).length > 0
+    (ex.parsed.ingredients || []).length >= 3
   );
 }
 
@@ -393,7 +395,7 @@ async function fetchLink(link: string): Promise<{
   // fallback: strip to text -> Groq
   $("script, style").remove();
   const text = $.text().replace(/\s+/g, " ").trim();
-  const ex = await groqExtract(text);
+  const ex = await llmExtract(text);
   return { source: "blog-text", link, ...ex };
 }
 
@@ -421,8 +423,8 @@ async function transcribeVideo(
       source: "transcript",
       unavailable: "yt-dlp/ffmpeg not installed",
     };
-  const key = GROQ_KEY();
-  if (!key) return { source: "transcript", unavailable: "no GROQ_API_KEY" };
+  const groqKey = process.env.GROQ_API_KEY;
+  if (!groqKey) return { source: "transcript", unavailable: "no GROQ_API_KEY for whisper" };
 
   const out = "/tmp/reel_audio.mp3";
   try {
@@ -451,14 +453,14 @@ async function transcribeVideo(
       "https://api.groq.com/openai/v1/audio/transcriptions",
       {
         method: "POST",
-        headers: { authorization: `Bearer ${key}` },
+        headers: { authorization: `Bearer ${groqKey}` },
         body: fd,
       }
     );
     const d = await r.json();
     if (d.error) return { source: "transcript", error: d.error.message };
 
-    const ex = await groqExtract(d.text || "");
+    const ex = await llmExtract(d.text || "");
     return {
       source: "transcript",
       transcript: (d.text || "").slice(0, 400),
@@ -486,7 +488,7 @@ export async function runCascade(url: string): Promise<CascadeResponse> {
 
   // step 1: caption -> Groq
   if (cap.ok && cap.caption) {
-    const ex = await groqExtract(cap.caption);
+    const ex = await llmExtract(cap.caption);
     res.debug!.step1_caption = ex;
     if (isGood(ex)) {
       res.stage = "caption";
@@ -500,7 +502,7 @@ export async function runCascade(url: string): Promise<CascadeResponse> {
     const cm = await getYouTubeComments(url);
     res.debug!.step2_comments = cm;
     if (cm.ok && cm.comments) {
-      const ex = await groqExtract(cm.comments);
+      const ex = await llmExtract(cm.comments);
       res.debug!.step2_comments_extract = ex;
       if (isGood(ex)) {
         res.stage = "comments";
@@ -546,7 +548,7 @@ export async function extractFromBlog(url: string) {
 
 // extract recipe from raw pasted text (caption, transcript, etc.)
 export async function extractFromText(text: string) {
-  const ex = await groqExtract(text);
+  const ex = await llmExtract(text);
   if (isGood(ex)) {
     return { stage: "caption" as const, result: ex.parsed! };
   }
