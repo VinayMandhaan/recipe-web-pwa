@@ -342,6 +342,128 @@ function TrackMini() {
   );
 }
 
+const EXTRACT_STEPS = [
+  { emoji: "🔗", text: "Reading the link" },
+  { emoji: "📝", text: "Scanning the caption" },
+  { emoji: "🎬", text: "Watching the video" },
+  { emoji: "🥣", text: "Gathering ingredients" },
+  { emoji: "👨‍🍳", text: "Plating your recipe" },
+];
+
+function ExtractLoader() {
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setStep((s) => (s + 1) % EXTRACT_STEPS.length);
+    }, 2200);
+    return () => clearInterval(id);
+  }, []);
+
+  const current = EXTRACT_STEPS[step];
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col items-center">
+      {/* Animated cooking pot */}
+      <div className="relative w-32 h-28">
+        {/* Orbiting ingredient dots */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          {[
+            { c: "bg-amber-400", d: "0s" },
+            { c: "bg-emerald-400", d: "-1s" },
+            { c: "bg-rose-400", d: "-2s" },
+          ].map((dot, i) => (
+            <span
+              key={i}
+              className={`absolute w-2.5 h-2.5 rounded-full ${dot.c} animate-orbit`}
+              style={{ animationDelay: dot.d }}
+            />
+          ))}
+        </div>
+
+        <svg viewBox="0 0 120 110" className="relative w-full h-full" fill="none">
+          {/* Steam */}
+          {[34, 60, 86].map((x, i) => (
+            <path
+              key={i}
+              d={`M${x} 30 q-6 -8 0 -16 q6 -8 0 -16`}
+              stroke="#93C5FD"
+              strokeWidth="3"
+              strokeLinecap="round"
+              className="animate-steam"
+              style={{ animationDelay: `${i * 0.4}s` }}
+            />
+          ))}
+
+          {/* Bubbles inside pot */}
+          {[
+            { x: 45, y: 70, d: "0s" },
+            { x: 60, y: 66, d: "0.5s" },
+            { x: 75, y: 72, d: "1s" },
+          ].map((b, i) => (
+            <circle
+              key={i}
+              cx={b.x}
+              cy={b.y}
+              r="3"
+              fill="#3B82F6"
+              className="animate-bubble"
+              style={{ animationDelay: b.d }}
+            />
+          ))}
+
+          {/* Pot body */}
+          <path
+            d="M28 52 h64 l-5 38 a8 8 0 0 1 -8 7 H41 a8 8 0 0 1 -8 -7 Z"
+            fill="#EFF6FF"
+            stroke="#3B82F6"
+            strokeWidth="3"
+            strokeLinejoin="round"
+          />
+          {/* Pot rim */}
+          <rect x="24" y="46" width="72" height="9" rx="4.5" fill="#3B82F6" />
+          {/* Handles */}
+          <path d="M24 50 h-8 a3 3 0 0 0 0 6 h8" stroke="#3B82F6" strokeWidth="3" strokeLinecap="round" />
+          <path d="M96 50 h8 a3 3 0 0 1 0 6 h-8" stroke="#3B82F6" strokeWidth="3" strokeLinecap="round" />
+
+          {/* Stirring spoon */}
+          <g className="animate-stir">
+            <line x1="60" y1="20" x2="60" y2="64" stroke="#9CA3AF" strokeWidth="3" strokeLinecap="round" />
+            <ellipse cx="60" cy="68" rx="7" ry="4" fill="#9CA3AF" />
+          </g>
+        </svg>
+      </div>
+
+      {/* Cycling status text */}
+      <div key={step} className="mt-4 flex items-center gap-2 animate-fade-in-up">
+        <span className="text-lg">{current.emoji}</span>
+        <span className="text-sm font-medium text-gray-700">{current.text}</span>
+        <span className="flex gap-0.5">
+          {[0, 1, 2].map((d) => (
+            <span
+              key={d}
+              className="w-1 h-1 rounded-full bg-blue-400 animate-pulse-soft"
+              style={{ animationDelay: `${d * 0.2}s` }}
+            />
+          ))}
+        </span>
+      </div>
+
+      {/* Progress dots */}
+      <div className="mt-3 flex gap-1.5">
+        {EXTRACT_STEPS.map((_, i) => (
+          <span
+            key={i}
+            className={`h-1.5 rounded-full transition-all duration-300 ${
+              i === step ? "w-5 bg-blue-500" : "w-1.5 bg-gray-200"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function HomeTab() {
   const { user } = useAuth();
   const [url, setUrl] = useState("");
@@ -529,17 +651,7 @@ export default function HomeTab() {
       {/* Content area */}
       <div className="px-5 pb-6 space-y-5">
         {/* Loading */}
-        {loading && (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
-            <div className="h-5 bg-gray-100 animate-pulse rounded w-3/4" />
-            <div className="h-4 bg-gray-100 animate-pulse rounded w-1/2" />
-            <div className="space-y-2 mt-4">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-3.5 bg-gray-100 animate-pulse rounded w-full" />
-              ))}
-            </div>
-          </div>
-        )}
+        {loading && <ExtractLoader />}
 
         {/* Error */}
         {error && (
