@@ -486,7 +486,7 @@ export async function runCascade(url: string): Promise<CascadeResponse> {
     debug: {},
   };
 
-  // step 1: caption -> Groq
+  // step 1: caption -> LLM
   if (cap.ok && cap.caption) {
     const ex = await llmExtract(cap.caption);
     res.debug!.step1_caption = ex;

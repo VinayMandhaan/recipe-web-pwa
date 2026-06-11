@@ -19,9 +19,9 @@ export async function GET() {
   return NextResponse.json({
     status: "ok",
     node: process.version,
-    llm_provider: process.env.GEMINI_API_KEY ? "gemini" : "groq",
-    llm_key_loaded: !!(process.env.GEMINI_API_KEY || process.env.GROQ_API_KEY),
-    llm_model: process.env.GEMINI_API_KEY ? (process.env.GEMINI_MODEL || "gemini-2.5-flash") : (process.env.GROQ_MODEL || "llama-3.1-8b-instant"),
+    llm_provider: process.env.LLM_PROVIDER || "gemini",
+    llm_key_loaded: !!(process.env.LLM_PROVIDER === "groq" ? process.env.GROQ_API_KEY : process.env.GEMINI_API_KEY),
+    llm_model: process.env.LLM_PROVIDER === "groq" ? (process.env.GROQ_MODEL || "llama-3.1-8b-instant") : (process.env.GEMINI_MODEL || "gemini-2.5-flash"),
     ytdlp: ytdlp ? { installed: true, version: ytdlp } : { installed: false },
     ffmpeg: ffmpegVersion
       ? { installed: true, version: ffmpegVersion }
