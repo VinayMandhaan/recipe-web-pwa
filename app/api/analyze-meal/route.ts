@@ -80,6 +80,13 @@ export async function POST(req: Request) {
         }),
       });
 
+      if (!r.ok) {
+        const err = await r.text();
+        console.error("LLM vision error:", r.status, err);
+        const msg = r.status === 429 ? "Rate limited. Please try again in a few seconds." : "Could not analyze image";
+        return NextResponse.json({ error: msg }, { status: r.status });
+      }
+
       const d = await r.json();
       if (d.error) {
         console.error("LLM vision error:", d.error);
@@ -160,6 +167,13 @@ export async function POST(req: Request) {
           temperature: 0,
         }),
       });
+
+      if (!r.ok) {
+        const err = await r.text();
+        console.error("LLM nutrition error:", r.status, err);
+        const msg = r.status === 429 ? "Rate limited. Please try again in a few seconds." : "Could not estimate nutrition";
+        return NextResponse.json({ error: msg }, { status: r.status });
+      }
 
       const d = await r.json();
       if (d.error) {

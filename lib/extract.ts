@@ -281,6 +281,10 @@ async function llmExtract(
         temperature: 0,
       }),
     });
+    if (!r.ok) {
+      const err = await r.text();
+      return { error: `LLM HTTP ${r.status}: ${err.slice(0, 200)}` };
+    }
     const d = await r.json();
     if (d.error) return { error: d.error.message || JSON.stringify(d.error) };
     return { parsed: JSON.parse(d.choices[0].message.content) };

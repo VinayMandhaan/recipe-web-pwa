@@ -41,6 +41,13 @@ export async function POST(req: Request) {
       }),
     });
 
+    if (!r.ok) {
+      const err = await r.text();
+      console.error("LLM swap error:", r.status, err);
+      const msg = r.status === 429 ? "Rate limited. Please try again in a few seconds." : "Could not get swaps";
+      return NextResponse.json({ error: msg }, { status: r.status });
+    }
+
     const d = await r.json();
     if (d.error) {
       return NextResponse.json({ error: "Could not get swaps" }, { status: 500 });

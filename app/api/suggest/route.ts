@@ -76,6 +76,13 @@ export async function POST(req: NextRequest) {
       }),
     });
 
+    if (!r.ok) {
+      const err = await r.text();
+      console.error("LLM suggest error:", r.status, err);
+      const msg = r.status === 429 ? "Rate limited. Please try again in a few seconds." : "Could not generate suggestions";
+      return NextResponse.json({ error: msg }, { status: r.status });
+    }
+
     const d = await r.json();
     if (d.error) {
       console.error("LLM suggest error:", d.error);

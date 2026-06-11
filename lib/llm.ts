@@ -4,8 +4,8 @@ const PROVIDERS = {
   gemini: {
     url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
     key: () => process.env.GEMINI_API_KEY || "",
-    model: () => process.env.GEMINI_MODEL || "gemini-2.0-flash",
-    visionModel: () => process.env.GEMINI_MODEL || "gemini-2.0-flash",
+    model: () => process.env.GEMINI_MODEL || "gemini-2.5-flash-lite",
+    visionModel: () => process.env.GEMINI_MODEL || "gemini-2.5-flash-lite",
   },
   groq: {
     url: "https://api.groq.com/openai/v1/chat/completions",
