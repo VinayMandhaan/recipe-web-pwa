@@ -17,7 +17,7 @@ export interface ExtractResponse {
   url: string;
   platform: string | null;
   caption: string;
-  stage: "caption" | "comments" | "blog" | "transcript" | "fallback";
+  stage: "caption" | "comments" | "blog" | "transcript" | "video" | "fallback";
   result: RecipeResult | null;
   message?: string;
 }
@@ -27,6 +27,7 @@ const STAGE_LABELS: Record<string, { label: string; color: string }> = {
   comments: { label: "From comments", color: "bg-teal-500/15 text-teal-400" },
   blog: { label: "From blog", color: "bg-blue-500/15 text-blue-400" },
   transcript: { label: "From audio", color: "bg-purple-500/15 text-purple-400" },
+  video: { label: "From video", color: "bg-pink-500/15 text-pink-500" },
   fallback: { label: "Not found", color: "bg-gray-100 text-gray-500" },
 };
 

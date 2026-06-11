@@ -24,7 +24,7 @@ export interface CascadeResponse {
   caption: string;
   caption_ok: boolean;
   reason: string | null;
-  stage: "caption" | "comments" | "blog" | "transcript" | "fallback";
+  stage: "caption" | "comments" | "blog" | "transcript" | "video" | "fallback";
   result: RecipeResult | null;
   message?: string;
   debug?: Record<string, unknown>;
